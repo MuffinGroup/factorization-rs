@@ -19,6 +19,12 @@ jobs:
       - name: Run tests
         run: cargo test --verbose
 
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: executable-linux
+          path: target/debug/factorization
+
   build-windows:
     runs-on: windows-latest
     steps:
@@ -27,3 +33,9 @@ jobs:
         run: cargo build --verbose
       - name: Run tests
         run: cargo test --verbose
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v2
+        with:
+          name: executable-windows
+          path: target/debug/factorization
