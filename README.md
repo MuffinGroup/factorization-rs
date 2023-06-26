@@ -16,7 +16,7 @@ MIT license for more info see [LICENSE](https://github.com/MuffinGroup/Factoriza
 
 ## Credits
 
-- Credit goes to all contributors of this project especially @Thepigcat76, @TheHackerChampion, @ReadyPlayerOne14
+- Credit goes to all contributors of this project especially [@Thepigcat76](https://github.com/Thepigcat76), [@TheHackerChampion](https://github.com/TheHackerChampion), [@ReadyPlayerOne14](https://github.com/ReadyPlayerOne14)
 
 - Additional credits to [voxel-rs](https://github.com/Technici4n/voxel-rs)
 
