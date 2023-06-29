@@ -1,4 +1,5 @@
 extern crate glium;
+use glium::implement_vertex;
 #[allow(unused_imports)]
 use glium::{glutin, Surface};
 
@@ -10,6 +11,19 @@ fn main() {
     let cb = glium::glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
+    #[derive(Copy, Clone)]
+    struct Vertex {
+        position: [f32; 2],
+    }
+
+    implement_vertex!(Vertex, position);
+
+    // vertexes
+    let vertex1 = Vertex { position: [-0.5, -0.5] };
+    let vertex2 = Vertex { position: [0.0, -0.5] };
+    let vertex3 = Vertex { position: [-0.5, -0.5] };
+
+    // event loop
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
