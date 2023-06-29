@@ -9,4 +9,3 @@ edition = "2021"
 gl = "*"
 glium = "*"
 image = "*"
-
