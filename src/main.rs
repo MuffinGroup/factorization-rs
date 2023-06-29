@@ -1,14 +1,15 @@
+#[macro_use]
 extern crate glium;
-use glium::implement_vertex;
-#[allow(unused_imports)]
-use glium::{glutin, Surface};
+
+mod glsl_reader;
 
 fn main() {
-    let event_loop = glium::glutin::event_loop::EventLoop::new();
-    let wb = glium::glutin::window::WindowBuilder::new()
-        .with_inner_size(glium::glutin::dpi::LogicalSize::new(1024.0, 768.0))
-        .with_title("Hello world");
-    let cb = glium::glutin::ContextBuilder::new();
+    #[allow(unused_imports)]
+    use glium::{glutin, Surface};
+
+    let event_loop = glutin::event_loop::EventLoop::new();
+    let wb = glutin::window::WindowBuilder::new();
+    let cb = glutin::ContextBuilder::new();
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     #[derive(Copy, Clone)]
@@ -18,42 +19,45 @@ fn main() {
 
     implement_vertex!(Vertex, position);
 
-    // vertexes
     let vertex1 = Vertex { position: [-0.5, -0.5] };
-    let vertex2 = Vertex { position: [0.0, -0.5] };
-    let vertex3 = Vertex { position: [-0.5, -0.5] };
+    let vertex2 = Vertex { position: [ 0.0,  0.5] };
+    let vertex3 = Vertex { position: [ 0.5, -0.25] };
+    let shape = vec![vertex1, vertex2, vertex3];
 
-    // event loop
+    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
+
+    let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
+
+    let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
+
     event_loop.run(move |event, _, control_flow| {
-        let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
+        let next_frame_time = std::time::Instant::now() +
+            std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
-            // if the event is window realted
             glutin::event::Event::WindowEvent { event, .. } => match event {
-                // if the window is request to be closed
                 glutin::event::WindowEvent::CloseRequested => {
-                    // close the window and end the program
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
-                }
-                // else
-                _ => {},
+                    return;
+                },
+                _ => return,
             },
-
-            // starts a new loop if there's a cause for it
             glutin::event::Event::NewEvents(cause) => match cause {
                 glutin::event::StartCause::ResumeTimeReached { .. } => (),
                 glutin::event::StartCause::Init => (),
-                _ => {},
+                _ => return,
             },
-            _ => {},
+            _ => return,
         }
-        // drawing to the screen
+
         let mut target = display.draw();
-        // filling the screen
-        target.clear_color(10.0, 0.0, 1.0, 1.0);
-        // ending the drawing sequence
+        target.clear_color(0.0, 1.0, 1.0, 1.0);
+        target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
+                    &Default::default()).unwrap();
         target.finish().unwrap();
     });
 }
