@@ -27,9 +27,9 @@ fn main() {
     let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
+    let vertex_shader_src = &glsl_reader::read("src/vertex_shader.vert");
 
-    let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
+    let fragment_shader_src = &glsl_reader::read("src/fragment_shader.frag");
 
     let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
 
