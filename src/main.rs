@@ -3,39 +3,67 @@ extern crate glium;
 
 mod glsl_reader;
 
-fn main() {
-    #[allow(unused_imports)]
-    use glium::{glutin, Surface};
+#[allow(unused_imports)]
+use glium::{glutin, Surface};
 
+fn main() {
+    // event loop creation
     let event_loop = glutin::event_loop::EventLoop::new();
-    let wb = glutin::window::WindowBuilder::new();
+    // the window
+    let wb = glutin::window::WindowBuilder::new()
+        .with_inner_size(glium::glutin::dpi::LogicalSize::new(1024.0, 768.0))
+        .with_title("Hello world");
     let cb = glutin::ContextBuilder::new();
+    // Displays the window
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     #[derive(Copy, Clone)]
+    // Vertex struct creation
     struct Vertex {
         position: [f32; 2],
     }
 
+    // Vertex implementation
     implement_vertex!(Vertex, position);
 
-    let vertex1 = Vertex { position: [-0.5, -0.5] };
-    let vertex2 = Vertex { position: [ 0.0,  0.5] };
-    let vertex3 = Vertex { position: [ 0.5, -0.25] };
-    let shape = vec![vertex1, vertex2, vertex3];
-
+    // Vertex properties
+    let vertex1 = Vertex {
+        position: [0.5, 0.0],
+    };
+    let vertex2 = Vertex {
+        position: [0.5, 0.5],
+    };
+    let vertex3 = Vertex {
+        position: [-0.5, -0.0],
+    };
+    let vertex4 = Vertex {
+        position: [0.5, 0.5],
+    };
+    let vertex5 = Vertex {
+        position: [-0.5, 0.5],
+    };
+    let vertex6 = Vertex {
+        position: [-0.5, -0.0],
+    };
+    
+    let shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
+    // Vertex handler
     let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let vertex_shader_src = &glsl_reader::read("src/vertex_shader.vert");
+    // Shaders
+    // controls the position
+    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
+    //controls the color
+    let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
 
-    let fragment_shader_src = &glsl_reader::read("src/fragment_shader.frag");
-
-    let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None).unwrap();
+    let program =
+        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+            .unwrap();
 
     event_loop.run(move |event, _, control_flow| {
-        let next_frame_time = std::time::Instant::now() +
-            std::time::Duration::from_nanos(16_666_667);
+        let next_frame_time =
+            std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
@@ -43,7 +71,7 @@ fn main() {
                 glutin::event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
-                },
+                }
                 _ => return,
             },
             glutin::event::Event::NewEvents(cause) => match cause {
@@ -56,8 +84,15 @@ fn main() {
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
-        target.draw(&vertex_buffer, &indices, &program, &glium::uniforms::EmptyUniforms,
-                    &Default::default()).unwrap();
+        target
+            .draw(
+                &vertex_buffer,
+                &indices,
+                &program,
+                &glium::uniforms::EmptyUniforms,
+                &Default::default(),
+            )
+            .unwrap();
         target.finish().unwrap();
     });
 }
