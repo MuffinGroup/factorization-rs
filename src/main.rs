@@ -48,9 +48,14 @@ fn main() {
     };
     
     let mut shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
+
+    let shape2 = vec![vertex1, vertex2, vertex3];
     // Vertex handler
-    let vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+    let vertex_buffer = glium::VertexBuffer::new(&display, &shape2).unwrap();
+    let vertex_buffer_2 = glium::VertexBuffer::new(&display, &shape).unwrap();
+
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+    let indices_2 = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     // Shaders
     // controls the position
@@ -124,6 +129,15 @@ fn main() {
                 .draw(
                     &vertex_buffer,
                     &indices,
+                    &program,
+                    &glium::uniforms::EmptyUniforms,
+                    &Default::default(),
+                )
+                .unwrap();
+            target
+                .draw(
+                    &vertex_buffer_2,
+                    &indices_2,
                     &program,
                     &glium::uniforms::EmptyUniforms,
                     &Default::default(),
