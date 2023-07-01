@@ -29,3 +29,11 @@ MIT license for more info see [LICENSE](https://github.com/MuffinGroup/Factoriza
 - Keep files in their respective directories
 
 - Follow the modelling and texturing standards (low-poly & 16x textures)
+
+## Plans
+
+The first task is to complete the voxel engine we will be using for this game to enable high level control of game development - finished aprox end of july 2023
+
+Then we will start with the core gameplay like minining, farming, processing chains, etc... - start aprox beginning of august
+
+At the very end we will provide support for jit modding using a custom simple to use language called  - some time at the end of 2023/next year

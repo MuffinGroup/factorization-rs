@@ -4,19 +4,30 @@ extern crate glium;
 mod glsl_reader;
 use glium::{glutin::{self, event::MouseButton}, Surface};
 
+#[allow(unused_imports)]
+use glium::{glutin, Surface};
+
 fn main() {
+    // event loop creation
     let event_loop = glutin::event_loop::EventLoop::new();
-    let wb = glutin::window::WindowBuilder::new();
+    // the window
+    let wb = glutin::window::WindowBuilder::new()
+        .with_inner_size(glium::glutin::dpi::LogicalSize::new(1024.0, 768.0))
+        .with_title("Hello world");
     let cb = glutin::ContextBuilder::new();
+    // Displays the window
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
     #[derive(Copy, Clone)]
+    // Vertex struct creation
     struct Vertex {
         position: [f32; 2],
     }
 
+    // Vertex implementation
     implement_vertex!(Vertex, position);
 
+    // Vertex properties
     let vertex1 = Vertex {
         position: [0.5, 0.0],
     };
