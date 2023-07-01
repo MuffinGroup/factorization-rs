@@ -94,6 +94,12 @@ fn main() {
                         vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
                     }
                 }
+                glutin::event::WindowEvent::CursorMoved { position, .. } => {
+                    for vertex in &mut shape {
+                        vertex.position[0] += position.x as f32/100000.0 - 0.005; // Update X coordinate
+                    }
+                    vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+                }
                 _ => (),
             },
             glutin::event::Event::NewEvents(cause) => match cause {
