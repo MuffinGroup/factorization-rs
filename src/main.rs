@@ -2,11 +2,9 @@
 extern crate glium;
 
 mod glsl_reader;
+use glium::{glutin::{self, event::MouseButton}, Surface};
 
 fn main() {
-    #[allow(unused_imports)]
-    use glium::{glutin, Surface};
-
     let event_loop = glutin::event_loop::EventLoop::new();
     let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new();
@@ -39,18 +37,30 @@ fn main() {
     };
 
     let mut shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
-
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
+
+    let shape2 = vec![vertex1, vertex2, vertex3];
+    let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
     let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
 
     let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
 
     let program =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+        glium::Program::from_source(
+            &display,
+            vertex_shader_src, 
+            fragment_shader_src, 
+            None)
             .unwrap();
 
+    // execute once
+    for vertex in &mut shape {
+        vertex.position[1] += 1.0;
+    }
+
+    // execute always
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
@@ -96,9 +106,29 @@ fn main() {
                 }
                 glutin::event::WindowEvent::CursorMoved { position, .. } => {
                     for vertex in &mut shape {
-                        vertex.position[0] += position.x as f32/100000.0 - 0.005; // Update X coordinate
+                        vertex.position[0] += position.x as f32 / 10000000.0 - 0.005;
+                        // Update X coordinate
                     }
                     vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
+                }
+                glutin::event::WindowEvent::MouseInput { state, button, .. } => {
+                    match (state, button) {
+                        (glutin::event::ElementState::Released, MouseButton::Left) => {
+                            for vertex in &mut shape {
+                                vertex.position[0] /= 1.2;
+                                vertex.position[1] /= 1.2;
+                                println!("wheee");
+                            }
+                        }
+                        (glutin::event::ElementState::Released, MouseButton::Right) => {
+                            for vertex in &mut shape {
+                                vertex.position[0] *= 1.2;
+                                vertex.position[1] *= 1.2;
+                                println!("wheee");
+                            }
+                        }
+                        _ => ()
+                    }
                 }
                 _ => (),
             },
@@ -110,11 +140,28 @@ fn main() {
             _ => return,
         }
 
+        for vertex1 in &mut shape {
+            for vertex2 in &shape2 {
+                if vertex1.position[1] > vertex2.position[1] {
+                    // println!("{}, {}", vertex1.position[0], vertex1.position[1])
+                }
+            }
+        }
+
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
         target
             .draw(
                 &vertex_buffer,
+                &indices,
+                &program,
+                &glium::uniforms::EmptyUniforms,
+                &Default::default(),
+            )
+            .unwrap();
+        target
+            .draw(
+                &vertex_buffer_shape_2,
                 &indices,
                 &program,
                 &glium::uniforms::EmptyUniforms,
