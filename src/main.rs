@@ -2,10 +2,10 @@
 extern crate glium;
 
 mod glsl_reader;
-use glium::{glutin::{self, event::MouseButton}, Surface};
+use glium::glutin::{self, event::MouseButton};
 
 #[allow(unused_imports)]
-use glium::{glutin, Surface};
+use glium::{Surface};
 
 fn main() {
     // event loop creation
@@ -22,29 +22,36 @@ fn main() {
     // Vertex struct creation
     struct Vertex {
         position: [f32; 2],
+        #[allow(dead_code)]
+        rgb: [f32; 3]
     }
-
     // Vertex implementation
     implement_vertex!(Vertex, position);
 
     // Vertex properties
     let vertex1 = Vertex {
         position: [0.5, 0.0],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex2 = Vertex {
         position: [0.5, 0.5],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex3 = Vertex {
         position: [-0.5, -0.0],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex4 = Vertex {
         position: [0.5, 0.5],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex5 = Vertex {
         position: [-0.5, 0.5],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex6 = Vertex {
         position: [-0.5, -0.0],
+        rgb: [1.0, 1.0, 1.0]
     };
 
     let mut shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
