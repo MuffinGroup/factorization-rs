@@ -74,6 +74,8 @@ fn main() {
             .unwrap();
 
     // execute once
+    let mut t: f32 = -0.5;
+
     for vertex in &mut shape {
         vertex.position[1] += 1.0;
     }
@@ -158,25 +160,24 @@ fn main() {
             _ => return,
         }
 
-        for vertex1 in &mut shape {
-            for vertex2 in &shape2 {
-                if vertex1.position[1] > vertex2.position[1] {
-                    // println!("{}, {}", vertex1.position[0], vertex1.position[1])
-                }
-            }
+        t += 0.002;
+        if t > 0.5 {
+            t = -0.5;
         }
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
-        target
-            .draw(
-                &vertex_buffer,
-                &indices,
-                &program,
-                &glium::uniforms::EmptyUniforms,
-                &Default::default(),
-            )
-            .unwrap();
+        
+        let uniforms = uniform! {
+            matrix: [
+                [ t.cos(), t.sin(), 0.0, 0.0],
+                [-t.sin(), t.cos(), 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [0.0, 0.0, 0.0, 1.0f32],
+            ]
+        };
+        
+        target.draw(&vertex_buffer, &indices, &program, &uniforms, &Default::default()).unwrap();
         target
             .draw(
                 &vertex_buffer_shape_2,
