@@ -70,7 +70,7 @@ fn main() {
 
     let image = image::load(
         Cursor::new(&include_bytes!(
-            "resources/textures/test.png"
+            "../resources/textures/test.png"
         )),
         image::ImageFormat::Png,
     )
