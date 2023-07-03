@@ -1,11 +1,17 @@
 #[macro_use]
 extern crate glium;
+extern crate image;
 
 mod glsl_reader;
-use glium::glutin::{self, event::MouseButton};
+mod logger;
+mod info_types;
 
+use glium::glutin::{self, event::MouseButton};
+use std::io::Cursor;
 #[allow(unused_imports)]
-use glium::{Surface};
+use glium::Surface;
+
+use crate::logger::log;
 
 fn main() {
     // event loop creation
@@ -22,39 +28,27 @@ fn main() {
     // Vertex struct creation
     struct Vertex {
         position: [f32; 2],
-        #[allow(dead_code)]
-        rgb: [f32; 3]
+        tex_coords: [f32; 2],
     }
+
     // Vertex implementation
-    implement_vertex!(Vertex, position);
+    implement_vertex!(Vertex, position, tex_coords);
 
     // Vertex properties
     let vertex1 = Vertex {
-        position: [0.5, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        position: [-0.5, -0.5],
+        tex_coords: [0.0, 0.0],
     };
     let vertex2 = Vertex {
-        position: [0.5, 0.5],
-        rgb: [1.0, 1.0, 1.0]
+        position: [0.0, 0.5],
+        tex_coords: [0.0, 1.0],
     };
     let vertex3 = Vertex {
-        position: [-0.5, -0.0],
-        rgb: [1.0, 1.0, 1.0]
-    };
-    let vertex4 = Vertex {
-        position: [0.5, 0.5],
-        rgb: [1.0, 1.0, 1.0]
-    };
-    let vertex5 = Vertex {
-        position: [-0.5, 0.5],
-        rgb: [1.0, 1.0, 1.0]
-    };
-    let vertex6 = Vertex {
-        position: [-0.5, -0.0],
-        rgb: [1.0, 1.0, 1.0]
+        position: [0.5, -0.25],
+        tex_coords: [1.0, 0.0],
     };
 
-    let mut shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
+    let mut shape = vec![vertex1, vertex2, vertex3];
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -66,14 +60,24 @@ fn main() {
     let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
 
     let program =
-        glium::Program::from_source(
-            &display,
-            vertex_shader_src, 
-            fragment_shader_src, 
-            None)
+        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
 
     // execute once
+    let image = image::load(
+        Cursor::new(&include_bytes!(
+            "resources/textures/test.png"
+        )),
+        image::ImageFormat::Png,
+    )
+    .unwrap()
+    .to_rgba8();
+
+    let image_dimensions = image.dimensions();
+    let image =
+        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
+
     let mut t: f32 = -0.5;
 
     for vertex in &mut shape {
@@ -147,7 +151,7 @@ fn main() {
                                 println!("wheee");
                             }
                         }
-                        _ => ()
+                        _ => (),
                     }
                 }
                 _ => (),
@@ -164,20 +168,31 @@ fn main() {
         if t > 0.5 {
             t = -0.5;
         }
+        
+        log("uwu");
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
-        
+
         let uniforms = uniform! {
             matrix: [
-                [ t.cos(), t.sin(), 0.0, 0.0],
-                [-t.sin(), t.cos(), 0.0, 0.0],
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
                 [0.0, 0.0, 1.0, 0.0],
-                [0.0, 0.0, 0.0, 1.0f32],
-            ]
+                [ t , 0.0, 0.0, 1.0f32],
+            ],
+            tex: &texture,
         };
-        
-        target.draw(&vertex_buffer, &indices, &program, &uniforms, &Default::default()).unwrap();
+
+        target
+            .draw(
+                &vertex_buffer,
+                &indices,
+                &program,
+                &uniforms,
+                &Default::default(),
+            )
+            .unwrap();
         target
             .draw(
                 &vertex_buffer_shape_2,
