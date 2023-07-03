@@ -6,14 +6,13 @@ extern crate chrono;
 mod glsl_reader;
 mod logger;
 mod info_types;
+mod image_loader;
 
-use glium::glutin::{self, event::MouseButton};
+use glium::{glutin::{self, event::MouseButton}, Surface};
 use std::io::Cursor;
 use info_types::InfoTypes;
-#[allow(unused_imports)]
-use glium::Surface;
 
-use crate::logger::log;
+use crate::{logger::log, image_loader::load_image};
 
 fn main() {
     // event loop creation
@@ -67,6 +66,7 @@ fn main() {
 
     // execute once
     log("Started succesful", Some(InfoTypes::INFO.info_type()));
+    
 
     let image = image::load(
         Cursor::new(&include_bytes!(
@@ -81,6 +81,8 @@ fn main() {
     let image =
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
+
+    let loaded_image = load_image("C:/Users/Admin/rust/factorization-rs/resources/textures/test.png", &display);
 
     let mut t: f32 = -0.5;
 
@@ -186,7 +188,7 @@ fn main() {
                 [0.0, 0.0, 1.0, 0.0],
                 [ t , 0.0, 0.0, 1.0f32],
             ],
-            tex: &texture,
+            tex: &loaded_image
         };
 
         target
