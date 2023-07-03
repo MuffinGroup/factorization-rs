@@ -1,11 +1,18 @@
 #[macro_use]
 extern crate glium;
+extern crate image;
 
 mod glsl_reader;
-use glium::{glutin::{self, event::MouseButton}, Surface};
+mod logger;
+mod info_types;
 
+use glium::glutin::{self, event::MouseButton};
+use std::io::Cursor;
+use info_types::InfoTypes;
 #[allow(unused_imports)]
-use glium::{glutin, Surface};
+use glium::Surface;
+
+use crate::logger::log;
 
 fn main() {
     // event loop creation
@@ -22,32 +29,27 @@ fn main() {
     // Vertex struct creation
     struct Vertex {
         position: [f32; 2],
+        tex_coords: [f32; 2],
     }
 
     // Vertex implementation
-    implement_vertex!(Vertex, position);
+    implement_vertex!(Vertex, position, tex_coords);
 
     // Vertex properties
     let vertex1 = Vertex {
-        position: [0.5, 0.0],
+        position: [-0.5, -0.5],
+        tex_coords: [0.0, 0.0],
     };
     let vertex2 = Vertex {
-        position: [0.5, 0.5],
+        position: [0.0, 0.5],
+        tex_coords: [0.0, 1.0],
     };
     let vertex3 = Vertex {
-        position: [-0.5, -0.0],
-    };
-    let vertex4 = Vertex {
-        position: [0.5, 0.5],
-    };
-    let vertex5 = Vertex {
-        position: [-0.5, 0.5],
-    };
-    let vertex6 = Vertex {
-        position: [-0.5, -0.0],
+        position: [0.5, -0.25],
+        tex_coords: [1.0, 0.0],
     };
 
-    let mut shape = vec![vertex1, vertex2, vertex3, vertex4, vertex5, vertex6];
+    let mut shape = vec![vertex1, vertex2, vertex3];
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
@@ -59,14 +61,28 @@ fn main() {
     let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
 
     let program =
-        glium::Program::from_source(
-            &display,
-            vertex_shader_src, 
-            fragment_shader_src, 
-            None)
+        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
 
     // execute once
+    log("Started succesful", Some(InfoTypes::INFO.info_type()));
+
+    let image = image::load(
+        Cursor::new(&include_bytes!(
+            "resources/textures/test.png"
+        )),
+        image::ImageFormat::Png,
+    )
+    .unwrap()
+    .to_rgba8();
+
+    let image_dimensions = image.dimensions();
+    let image =
+        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
+
+    let mut t: f32 = -0.5;
+
     for vertex in &mut shape {
         vertex.position[1] += 1.0;
     }
@@ -138,7 +154,7 @@ fn main() {
                                 println!("wheee");
                             }
                         }
-                        _ => ()
+                        _ => (),
                     }
                 }
                 _ => (),
@@ -151,22 +167,33 @@ fn main() {
             _ => return,
         }
 
-        for vertex1 in &mut shape {
-            for vertex2 in &shape2 {
-                if vertex1.position[1] > vertex2.position[1] {
-                    // println!("{}, {}", vertex1.position[0], vertex1.position[1])
-                }
-            }
+        t += 0.002;
+        if t > 0.5 {
+            t = -0.5;
         }
+        
+        // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
+        // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
+
+        let uniforms = uniform! {
+            matrix: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [ t , 0.0, 0.0, 1.0f32],
+            ],
+            tex: &texture,
+        };
+
         target
             .draw(
                 &vertex_buffer,
                 &indices,
                 &program,
-                &glium::uniforms::EmptyUniforms,
+                &uniforms,
                 &Default::default(),
             )
             .unwrap();
