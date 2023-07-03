@@ -18,8 +18,6 @@ MIT license for more info see [LICENSE](https://github.com/MuffinGroup/Factoriza
 
 - Credit goes to all contributors of this project especially [@Thepigcat76](https://github.com/Thepigcat76), [@TheHackerChampion](https://github.com/TheHackerChampion), [@ReadyPlayerOne14](https://github.com/ReadyPlayerOne14)
 
-[comment]: <> (- Additional credits to [voxel-rs]https://github.com/Technici4n/voxel-rs) 
-
 ## Contributing
 
 - Dicuss your changes with us and/or at least document them properly
@@ -37,3 +35,9 @@ The first task is to complete the voxel engine we will be using for this game to
 Then we will start with the core gameplay like minining, farming, processing chains, etc... - start aprox beginning of august
 
 At the very end we will provide support for jit modding using a custom simple to use language called  - some time at the end of 2023/next year
+
+## Similar Projects:
+
+- Rust voxel engine using glium (discontinued) https://github.com/Technici4n/voxel-rs
+- Rust voxel engine using volkano https://github.com/wahfl2/vk-voxel
+- C voxel engine/minecraft clone using opengl https://github.com/jdah/minecraft-weekend
