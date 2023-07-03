@@ -8,6 +8,7 @@ mod info_types;
 
 use glium::glutin::{self, event::MouseButton};
 use std::io::Cursor;
+use info_types::InfoTypes;
 #[allow(unused_imports)]
 use glium::Surface;
 
@@ -64,6 +65,8 @@ fn main() {
             .unwrap();
 
     // execute once
+    log("Started succesful", Some(InfoTypes::INFO.info_type()));
+
     let image = image::load(
         Cursor::new(&include_bytes!(
             "resources/textures/test.png"
@@ -169,7 +172,8 @@ fn main() {
             t = -0.5;
         }
         
-        log("uwu");
+        // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
+        // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);
