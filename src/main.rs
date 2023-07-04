@@ -68,6 +68,8 @@ fn main() {
 
     let loaded_image = load_image("resources/textures/test.png", &display);
 
+    let image2 = load_image("resources/textures/test_2.png", &display);
+
     let mut t: f32 = -0.5;
 
     for vertex in &mut shape {
@@ -171,6 +173,16 @@ fn main() {
                 [ t , 0.0, 0.0, 1.0f32],
             ],
             tex: &loaded_image
+        };        
+        
+        let uniforms2 = uniform! {
+            matrix: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [ t , 0.0, 0.0, 1.0f32],
+            ],
+            tex: &image2
         };
 
         target
@@ -187,7 +199,7 @@ fn main() {
                 &vertex_buffer_shape_2,
                 &indices,
                 &program,
-                &glium::uniforms::EmptyUniforms,
+                &uniforms2,
                 &Default::default(),
             )
             .unwrap();
