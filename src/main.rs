@@ -9,7 +9,6 @@ mod info_types;
 mod image_loader;
 
 use glium::{glutin::{self, event::MouseButton}, Surface};
-use std::io::Cursor;
 use info_types::InfoTypes;
 
 use crate::{logger::log, image_loader::load_image};
@@ -66,23 +65,8 @@ fn main() {
 
     // execute once
     log("Started succesful", Some(InfoTypes::INFO.info_type()));
-    
 
-    let image = image::load(
-        Cursor::new(&include_bytes!(
-            "../resources/textures/test.png"
-        )),
-        image::ImageFormat::Png,
-    )
-    .unwrap()
-    .to_rgba8();
-
-    let image_dimensions = image.dimensions();
-    let image =
-        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
-
-    let loaded_image = load_image("C:/Users/Admin/rust/factorization-rs/resources/textures/test.png", &display);
+    let loaded_image = load_image("resources/textures/test.png", &display);
 
     let mut t: f32 = -0.5;
 

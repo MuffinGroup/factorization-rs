@@ -1,3 +1,4 @@
+use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::io::Cursor;
@@ -5,8 +6,10 @@ use glium;
 use glium::texture::SrgbTexture2d;
 
 pub fn load_image(image_path: &str, display: &glium::Display) -> SrgbTexture2d {
-    println!("{}", image_path);
-    let mut file = File::open(image_path).expect("Failed to open image file");
+    let current_dir = env::current_dir().expect("Failed to get current directory");
+    println!("{}", current_dir.display());
+    let full_path = current_dir.join(image_path);
+    let mut file = File::open(full_path).expect("Failed to open image file");
     let mut image_bytes = Vec::new();
     file.read_to_end(&mut image_bytes).expect("Failed to read image file");
 
