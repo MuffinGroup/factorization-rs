@@ -48,11 +48,36 @@ fn main() {
         tex_coords: [1.0, 0.0],
     };
 
+    let vertex4 = Vertex {
+        position: [0.0, -0.5],
+        tex_coords: [0.0, 0.0],
+    };
+    let vertex5 = Vertex {
+        position: [0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+    };
+    let vertex6 = Vertex {
+        position: [-0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+    };
+    let vertex7 = Vertex {
+        position: [0.0, 0.5],
+        tex_coords: [0.0, 1.0],
+    };
+    let vertex8 = Vertex {
+        position: [-0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+    };
+    let vertex9 = Vertex {
+        position: [0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+    };
+
     let mut shape = vec![vertex1, vertex2, vertex3];
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let shape2 = vec![vertex1, vertex2, vertex3];
+    let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
     let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
