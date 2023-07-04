@@ -131,14 +131,12 @@ fn main() {
                             for vertex in &mut shape {
                                 vertex.position[0] /= 1.2;
                                 vertex.position[1] /= 1.2;
-                                println!("wheee");
                             }
                         }
                         (glutin::event::ElementState::Released, MouseButton::Right) => {
                             for vertex in &mut shape {
                                 vertex.position[0] *= 1.2;
                                 vertex.position[1] *= 1.2;
-                                println!("wheee");
                             }
                         }
                         _ => (),
