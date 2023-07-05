@@ -89,7 +89,7 @@ fn main() {
             .unwrap();
 
     // execute once
-    log("Started succesful", Some(InfoTypes::INFO.info_type()));
+    log("Started succesful", InfoTypes::INFO.info_type());
 
     let loaded_image = load_image("resources/textures/test.png", &display);
 
@@ -198,7 +198,7 @@ fn main() {
                 [ t , 0.0, 0.0, 1.0f32],
             ],
             tex: &loaded_image
-        };        
+        };
         
         let uniforms2 = uniform! {
             matrix: [
