@@ -1,17 +1,21 @@
 #[macro_use]
 extern crate glium;
-extern crate image;
 extern crate chrono;
+extern crate image;
 
 mod glsl_reader;
-mod logger;
-mod info_types;
 mod image_loader;
+mod info_types;
+mod logger;
+mod teapot;
 
-use glium::{glutin::{self, event::MouseButton}, Surface};
+use glium::{
+    glutin::{self, event::MouseButton},
+    Surface,
+};
 use info_types::InfoTypes::*;
 
-use crate::{logger::log, image_loader::load_image};
+use crate::{image_loader::load_image, logger::log};
 
 fn main() {
     // event loop creation
@@ -87,6 +91,15 @@ fn main() {
     let program =
         glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
             .unwrap();
+
+    let positions = glium::VertexBuffer::new(&display, &teapot::VERTICES).unwrap();
+    let normals = glium::VertexBuffer::new(&display, &teapot::NORMALS).unwrap();
+    let indices = glium::IndexBuffer::new(
+        &display,
+        glium::index::PrimitiveType::TrianglesList,
+        &teapot::INDICES,
+    )
+    .unwrap();
 
     // execute once
     log("Started succesful", INFO.types());
@@ -183,48 +196,26 @@ fn main() {
         if t > 0.5 {
             t = -0.5;
         }
-        
+
         // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
         // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
-        target.clear_color(0.0, 1.0, 1.0, 1.0);
+        target.clear_color(0.0, 0.0, 1.0, 0.0);
 
-        let uniforms = uniform! {
-            matrix: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [ t , 0.0, 0.0, 1.0f32],
-            ],
-            tex: &loaded_image
-        };
-        
-        let uniforms2 = uniform! {
-            matrix: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [ t , 0.0, 0.0, 1.0f32],
-            ],
-            tex: &image2
-        };
+        let matrix = [
+            [0.01, 0.0, 0.0, 0.0],
+            [0.0, 0.01, 0.0, 0.0],
+            [0.0, 0.0, 0.01, 0.0],
+            [0.0, 0.0, 0.0, 1.0f32]
+        ];
 
         target
             .draw(
-                &vertex_buffer,
+                (&positions, &normals),
                 &indices,
                 &program,
-                &uniforms,
-                &Default::default(),
-            )
-            .unwrap();
-        target
-            .draw(
-                &vertex_buffer_shape_2,
-                &indices,
-                &program,
-                &uniforms2,
+                &uniform! { matrix: matrix },
                 &Default::default(),
             )
             .unwrap();
