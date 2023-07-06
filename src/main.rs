@@ -9,7 +9,7 @@ mod info_types;
 mod image_loader;
 
 use glium::{glutin::{self, event::MouseButton}, Surface};
-use info_types::InfoTypes;
+use info_types::InfoTypes::*;
 
 use crate::{logger::log, image_loader::load_image};
 
@@ -89,7 +89,7 @@ fn main() {
             .unwrap();
 
     // execute once
-    log("Started succesful", InfoTypes::INFO.info_type());
+    log("Started succesful", INFO.types());
 
     let loaded_image = load_image("resources/textures/test.png", &display);
 
