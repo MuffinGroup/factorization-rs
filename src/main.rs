@@ -207,15 +207,17 @@ fn main() {
             [0.01, 0.0, 0.0, 0.0],
             [0.0, 0.01, 0.0, 0.0],
             [0.0, 0.0, 0.01, 0.0],
-            [0.0, 0.0, 0.0, 1.0f32]
+            [0.0, 0.0, 0.0, 1.0f32],
         ];
+
+        let light = [-1.0, 0.4, 0.9f32];
 
         target
             .draw(
                 (&positions, &normals),
                 &indices,
                 &program,
-                &uniform! { matrix: matrix },
+                &uniform! { matrix: matrix, u_light: light },
                 &Default::default(),
             )
             .unwrap();
