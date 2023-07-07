@@ -202,7 +202,7 @@ fn main() {
         // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
-        target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
+        target.clear_color_and_depth(colors::YELLOW, 1.0);
 
         let matrix = [
             [0.01, 0.0, 0.0, 0.0],
