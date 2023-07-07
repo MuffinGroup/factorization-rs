@@ -15,6 +15,7 @@ use glium::{
     Surface,
 };
 use info_types::InfoTypes::*;
+use colors::*;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -202,7 +203,7 @@ fn main() {
         // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
-        target.clear_color_and_depth(colors::YELLOW, 1.0);
+        target.clear_color_and_depth(YELLOW, 1.0);
 
         let matrix = [
             [0.01, 0.0, 0.0, 0.0],
