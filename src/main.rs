@@ -1,17 +1,20 @@
 #[macro_use]
 extern crate glium;
-extern crate image;
 extern crate chrono;
+extern crate image;
 
 mod glsl_reader;
-mod logger;
-mod info_types;
 mod image_loader;
+mod info_types;
+mod logger;
 
-use glium::{glutin::{self, event::MouseButton}, Surface};
-use info_types::InfoTypes;
+use glium::{
+    glutin::{self, event::MouseButton},
+    Surface,
+};
+use info_types::InfoTypes::*;
 
-use crate::{logger::log, image_loader::load_image};
+use crate::{image_loader::load_image, logger::log};
 
 fn main() {
     // event loop creation
@@ -29,44 +32,87 @@ fn main() {
     struct Vertex {
         position: [f32; 2],
         tex_coords: [f32; 2],
+        rgb: [f32; 3]
     }
 
     // Vertex implementation
-    implement_vertex!(Vertex, position, tex_coords);
+    implement_vertex!(Vertex, position, tex_coords, rgb);
 
     // Vertex properties
     let vertex1 = Vertex {
         position: [-0.5, -0.5],
         tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex2 = Vertex {
         position: [0.0, 0.5],
         tex_coords: [0.0, 1.0],
+        rgb: [1.0, 1.0, 1.0]
     };
     let vertex3 = Vertex {
         position: [0.5, -0.25],
         tex_coords: [1.0, 0.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+
+    let vertex4 = Vertex {
+        position: [0.0, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+    let vertex5 = Vertex {
+        position: [0.5, 0.5],
+        tex_coords: [0.0, 1.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+    let vertex6 = Vertex {
+        position: [-0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+    let vertex7 = Vertex {
+        position: [0.0, 0.5],
+        tex_coords: [0.0, 1.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+    let vertex8 = Vertex {
+        position: [-0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+        rgb: [1.0, 1.0, 1.0]
+    };
+    let vertex9 = Vertex {
+        position: [0.5, 0.0],
+        tex_coords: [1.0, 0.0],
+        rgb: [0.0, 0.0, 1.0]
     };
 
     let mut shape = vec![vertex1, vertex2, vertex3];
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
-    let shape2 = vec![vertex1, vertex2, vertex3];
+    let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
-    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
+    let vertex_shader = &glsl_reader::read("vertex_shader.vert");
 
-    let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
+    let fragment_shader_texture = &glsl_reader::read("fragment_shader_texture.frag");
+
+    let fragment_shader_color = &glsl_reader::read("fragment_shader_color.frag");
 
     let program =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+        glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
+            .unwrap();
+
+    let program_2 =
+        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None)
             .unwrap();
 
     // execute once
-    log("Started succesful", Some(InfoTypes::INFO.info_type()));
+    log("Started succesful", INFO.types());
 
     let loaded_image = load_image("resources/textures/test.png", &display);
+
+    let image2 = load_image("resources/textures/test_2.png", &display);
 
     let mut t: f32 = -0.5;
 
@@ -131,14 +177,12 @@ fn main() {
                             for vertex in &mut shape {
                                 vertex.position[0] /= 1.2;
                                 vertex.position[1] /= 1.2;
-                                println!("wheee");
                             }
                         }
                         (glutin::event::ElementState::Released, MouseButton::Right) => {
                             for vertex in &mut shape {
                                 vertex.position[0] *= 1.2;
                                 vertex.position[1] *= 1.2;
-                                println!("wheee");
                             }
                         }
                         _ => (),
@@ -158,7 +202,7 @@ fn main() {
         if t > 0.5 {
             t = -0.5;
         }
-        
+
         // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
         // log("Print, print, print...", None); <- sets it to the INFO type
 
@@ -175,6 +219,16 @@ fn main() {
             tex: &loaded_image
         };
 
+        let uniforms2 = uniform! {
+            matrix: [
+                [1.0, 0.0, 0.0, 0.0],
+                [0.0, 1.0, 0.0, 0.0],
+                [0.0, 0.0, 1.0, 0.0],
+                [ t , 0.0, 0.0, 1.0f32],
+            ],
+            tex: &image2
+        };
+
         target
             .draw(
                 &vertex_buffer,
@@ -188,8 +242,8 @@ fn main() {
             .draw(
                 &vertex_buffer_shape_2,
                 &indices,
-                &program,
-                &glium::uniforms::EmptyUniforms,
+                &program_2,
+                &uniforms2,
                 &Default::default(),
             )
             .unwrap();
