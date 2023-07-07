@@ -86,12 +86,46 @@ fn main() {
         rgb: [0.0, 0.0, 1.0]
     };
 
+    let square_vertex1 = Vertex {
+        position: [-0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 0.0, 1.0]
+    };
+    let square_vertex2 = Vertex {
+        position: [-0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [0.0, 1.0, 1.0]
+    };
+    let square_vertex3 = Vertex {
+        position: [0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 0.0]
+    };
+    let square_vertex4 = Vertex {
+        position: [0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 0.0, 1.0]
+    };
+    let square_vertex5 = Vertex {
+        position: [-0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [0.0, 1.0, 1.0]
+    };
+    let square_vertex6 = Vertex {
+        position: [0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 0.0]
+    };
+
     let mut shape = vec![vertex1, vertex2, vertex3];
     let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
     let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
+
+    let shape3 = vec![square_vertex1, square_vertex2, square_vertex3, square_vertex4, square_vertex5, square_vertex6];
+    let vertex_buffer_shape_3 = glium::VertexBuffer::new(&display, &shape3).unwrap();
 
     let vertex_shader = &glsl_reader::read("vertex_shader.vert");
 
@@ -241,6 +275,15 @@ fn main() {
         target
             .draw(
                 &vertex_buffer_shape_2,
+                &indices,
+                &program_2,
+                &uniforms2,
+                &Default::default(),
+            )
+            .unwrap();
+        target
+            .draw(
+                &vertex_buffer_shape_3,
                 &indices,
                 &program_2,
                 &uniforms2,
