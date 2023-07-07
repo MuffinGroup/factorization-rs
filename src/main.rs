@@ -93,18 +93,18 @@ fn main() {
     let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
-    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
+    let vertex_shader = &glsl_reader::read("vertex_shader.vert");
 
-    let fragment_shader_src = &glsl_reader::read("fragment_shader_texture.frag");
+    let fragment_shader_texture = &glsl_reader::read("fragment_shader_texture.frag");
 
-    let fragment_shader_2_src = &glsl_reader::read("fragment_shader_color.frag");
+    let fragment_shader_color = &glsl_reader::read("fragment_shader_color.frag");
 
     let program =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
+        glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
             .unwrap();
 
     let program_2 =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_2_src, None)
+        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None)
             .unwrap();
 
     // execute once
