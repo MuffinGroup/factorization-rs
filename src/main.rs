@@ -3,6 +3,7 @@ extern crate glium;
 extern crate chrono;
 extern crate image;
 
+mod colors;
 mod glsl_reader;
 mod image_loader;
 mod info_types;
@@ -24,7 +25,7 @@ fn main() {
     let wb = glutin::window::WindowBuilder::new()
         .with_inner_size(glium::glutin::dpi::LogicalSize::new(1024.0, 768.0))
         .with_title("Hello world");
-    let cb = glutin::ContextBuilder::new();
+    let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
     // Displays the window
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
@@ -201,7 +202,7 @@ fn main() {
         // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
-        target.clear_color(0.0, 0.0, 1.0, 0.0);
+        target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
         let matrix = [
             [0.01, 0.0, 0.0, 0.0],
@@ -212,13 +213,22 @@ fn main() {
 
         let light = [-1.0, 0.4, 0.9f32];
 
+        let params = glium::DrawParameters {
+            depth: glium::Depth {
+                test: glium::draw_parameters::DepthTest::IfLess,
+                write: true,
+                ..Default::default()
+            },
+            ..Default::default()
+        };
+
         target
             .draw(
                 (&positions, &normals),
                 &indices,
                 &program,
                 &uniform! { matrix: matrix, u_light: light },
-                &Default::default(),
+                &params,
             )
             .unwrap();
         target.finish().unwrap();
