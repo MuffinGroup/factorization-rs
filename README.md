@@ -40,6 +40,6 @@ At the very end we will provide support for jit modding using a custom simple to
 
 ## Similar Projects:
 
-- Rust voxel engine using glium (discontinued) https://github.com/Technici4n/voxel-rs
+- Rust voxel engine using wgpu (discontinued) https://github.com/Technici4n/voxel-rs
 - Rust voxel engine using volkano https://github.com/wahfl2/vk-voxel
 - C voxel engine/minecraft clone using opengl https://github.com/jdah/minecraft-weekend
