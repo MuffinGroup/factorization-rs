@@ -13,6 +13,8 @@ use glium::{
     Surface,
 };
 use info_types::InfoTypes::*;
+use std::io::Cursor;
+use std::fs;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -93,11 +95,48 @@ fn main() {
     let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
-    let vertex_shader = &glsl_reader::read("vertex_shader.vert");
+    let vertex_shader = 
+    r#"
+        #version 140
 
-    let fragment_shader_texture = &glsl_reader::read("fragment_shader_texture.frag");
+        in vec2 position;
+        in vec2 tex_coords;
+        in vec3 rgb;
+        out vec3 color_attribute;
+        out vec2 v_tex_coords;
+    
+        uniform mat4 matrix;
+    
+        void main() {
+            color_attribute = rgb;
+            v_tex_coords = tex_coords;
+            gl_Position = matrix * vec4(position, 0.0, 1.0);
+        }
+    "#;
 
-    let fragment_shader_color = &glsl_reader::read("fragment_shader_color.frag");
+    let fragment_shader_texture = r#"
+        #version 140
+
+        in vec2 v_tex_coords;
+        out vec4 color;
+    
+        uniform sampler2D tex;
+    
+        void main() {
+            color = texture(tex, v_tex_coords);
+        }
+    "#;
+
+    let fragment_shader_color = r#"
+        #version 140
+
+        out vec4 color;
+        in vec3 color_attribute;
+
+        void main() {
+            color = vec4(color_attribute, 1.0);
+        }
+    "#;
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
@@ -110,9 +149,12 @@ fn main() {
     // execute once
     log("Started succesful", INFO.types());
 
-    let loaded_image = load_image("resources/textures/test.png", &display);
 
-    let image2 = load_image("resources/textures/test_2.png", &display);
+    let image = image::load(Cursor::new(&include_bytes!("../resources/textures/test.png")),
+                            image::ImageFormat::Png).unwrap().to_rgba8();
+    let image_dimensions = image.dimensions();
+    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
 
     let mut t: f32 = -0.5;
 
@@ -216,17 +258,7 @@ fn main() {
                 [0.0, 0.0, 1.0, 0.0],
                 [ t , 0.0, 0.0, 1.0f32],
             ],
-            tex: &loaded_image
-        };
-
-        let uniforms2 = uniform! {
-            matrix: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [ t , 0.0, 0.0, 1.0f32],
-            ],
-            tex: &image2
+            tex: &texture
         };
 
         target
@@ -243,10 +275,16 @@ fn main() {
                 &vertex_buffer_shape_2,
                 &indices,
                 &program_2,
-                &uniforms2,
+                &uniforms,
                 &Default::default(),
             )
             .unwrap();
         target.finish().unwrap();
     });
+}
+
+fn load_shader_source(filename: &str) -> String {
+    let shader_code = fs::read_to_string(filename)
+        .expect("Failed to load shader source code");
+    shader_code
 }
