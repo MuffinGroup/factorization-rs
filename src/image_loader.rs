@@ -2,7 +2,6 @@ use std::env;
 use std::fs::File;
 use std::io::Read;
 use std::io::Cursor;
-use glium;
 use glium::texture::SrgbTexture2d;
 
 pub fn load_image(image_path: &str, display: &glium::Display) -> SrgbTexture2d {
