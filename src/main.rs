@@ -91,7 +91,7 @@ fn main() {
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let mut matrix = [
+        let matrix = [
             [0.01, 0.0, 0.0, 0.0],
             [0.0, 0.01, 0.0, 0.0],
             [0.0, 0.0, 0.01, 0.0],
