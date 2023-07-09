@@ -10,12 +10,12 @@ mod info_types;
 mod logger;
 mod teapot;
 
+use colors::*;
 use glium::{
     glutin::{self, event::MouseButton},
     Surface,
 };
 use info_types::InfoTypes::*;
-use colors::*;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -203,14 +203,32 @@ fn main() {
         // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
-        target.clear_color_and_depth(rgb(0,204,0), 1.0);
+        target.clear_color_and_depth(rgb(255, 140, 25), 1.0);
 
         let matrix = [
-            [0.01, 0.0, 0.0, 0.0],
-            [0.0, 0.01, 0.0, 0.0],
-            [0.0, 0.0, 0.01, 0.0],
-            [0.0, 0.0, 0.0, 1.0f32],
+            [0.01, 0.0, 0.0, 0.0],   // translation
+            [0.0, 0.01, 0.0, 0.0],   // scale
+            [0.0, 0.0, 0.01, 0.0],   // perspective x, y, z, scale
+            [0.0, 0.0, 1.5, 1.0f32], // position x, y, z, scale(higher value -> smaller size, samller value -> higher size)
         ];
+
+        let perspective = {
+            let (width, height) = target.get_dimensions();
+            let aspect_ratio = height as f32 / width as f32;
+
+            let fov: f32 = 3.141592 / 3.0;
+            let zfar = 1024.0;
+            let znear = 0.1;
+
+            let f = 1.0 / (fov / 2.0).tan();
+
+            [
+                [f * aspect_ratio, 0.0, 0.0, 0.0],
+                [0.0, f, 0.0, 0.0],
+                [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
+                [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
+            ]
+        };
 
         let light = [-1.0, 0.4, 0.9f32];
 
@@ -228,7 +246,7 @@ fn main() {
                 (&positions, &normals),
                 &indices,
                 &program,
-                &uniform! { matrix: matrix, u_light: light },
+                &uniform! { matrix: matrix, perspective: perspective, u_light: light },
                 &params,
             )
             .unwrap();
