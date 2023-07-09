@@ -1,125 +1,62 @@
 #[macro_use]
 extern crate glium;
-extern crate chrono;
-extern crate image;
 
-mod colors;
-mod glsl_reader;
-mod image_loader;
-mod info_types;
-mod logger;
 mod teapot;
 
-use colors::*;
-use glium::{
-    glutin::{self, event::MouseButton},
-    Surface,
-};
-use info_types::InfoTypes::*;
-
-use crate::{image_loader::load_image, logger::log};
-
 fn main() {
-    // event loop creation
+    #[allow(unused_imports)]
+    use glium::{glutin, Surface};
+
     let event_loop = glutin::event_loop::EventLoop::new();
-    // the window
-    let wb = glutin::window::WindowBuilder::new()
-        .with_inner_size(glium::glutin::dpi::LogicalSize::new(1024.0, 768.0))
-        .with_title("Hello world");
+    let wb = glutin::window::WindowBuilder::new();
     let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
-    // Displays the window
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
-
-    #[derive(Copy, Clone)]
-    // Vertex struct creation
-    struct Vertex {
-        position: [f32; 2],
-        tex_coords: [f32; 2],
-    }
-
-    // Vertex implementation
-    implement_vertex!(Vertex, position, tex_coords);
-
-    // Vertex properties
-    let vertex1 = Vertex {
-        position: [-0.5, -0.5],
-        tex_coords: [0.0, 0.0],
-    };
-    let vertex2 = Vertex {
-        position: [0.0, 0.5],
-        tex_coords: [0.0, 1.0],
-    };
-    let vertex3 = Vertex {
-        position: [0.5, -0.25],
-        tex_coords: [1.0, 0.0],
-    };
-
-    let vertex4 = Vertex {
-        position: [0.0, -0.5],
-        tex_coords: [0.0, 0.0],
-    };
-    let vertex5 = Vertex {
-        position: [0.5, 0.5],
-        tex_coords: [0.0, 1.0],
-    };
-    let vertex6 = Vertex {
-        position: [-0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-    };
-    let vertex7 = Vertex {
-        position: [0.0, 0.5],
-        tex_coords: [0.0, 1.0],
-    };
-    let vertex8 = Vertex {
-        position: [-0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-    };
-    let vertex9 = Vertex {
-        position: [0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-    };
-
-    let mut shape = vec![vertex1, vertex2, vertex3];
-    let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
-    let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
-    let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
-
-    let vertex_shader_src = &glsl_reader::read("vertex_shader.vert");
-
-    let fragment_shader_src = &glsl_reader::read("fragment_shader.frag");
-
-    let program =
-        glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src, None)
-            .unwrap();
 
     let positions = glium::VertexBuffer::new(&display, &teapot::VERTICES).unwrap();
     let normals = glium::VertexBuffer::new(&display, &teapot::NORMALS).unwrap();
-    let indices = glium::IndexBuffer::new(
-        &display,
-        glium::index::PrimitiveType::TrianglesList,
-        &teapot::INDICES,
-    )
-    .unwrap();
+    let indices = glium::IndexBuffer::new(&display, glium::index::PrimitiveType::TrianglesList,
+                                          &teapot::INDICES).unwrap();
 
-    // execute once
-    log("Started succesful", INFO.types());
+    let mut zoom = 2.0;
 
-    let loaded_image = load_image("resources/textures/test.png", &display);
+    let vertex_shader_src = r#"
+        #version 150
 
-    let image2 = load_image("resources/textures/test_2.png", &display);
+        in vec3 position;
+        in vec3 normal;
 
-    let mut t: f32 = -0.5;
+        out vec3 v_normal;
 
-    for vertex in &mut shape {
-        vertex.position[1] += 1.0;
-    }
+        uniform mat4 perspective;
+        uniform mat4 matrix;
 
-    // execute always
+        void main() {
+            v_normal = transpose(inverse(mat3(matrix))) * normal;
+            gl_Position = perspective * matrix * vec4(position, 1.0);
+        }
+    "#;
+
+    let fragment_shader_src = r#"
+        #version 150
+
+        in vec3 v_normal;
+        out vec4 color;
+        uniform vec3 u_light;
+
+        void main() {
+            float brightness = dot(normalize(v_normal), normalize(u_light));
+            vec3 dark_color = vec3(0.6, 0.0, 0.0);
+            vec3 regular_color = vec3(1.0, 0.0, 0.0);
+            color = vec4(mix(dark_color, regular_color, brightness), 1.0);
+        }
+    "#;
+
+    let program = glium::Program::from_source(&display, vertex_shader_src, fragment_shader_src,
+                                              None).unwrap();
+
     event_loop.run(move |event, _, control_flow| {
-        let next_frame_time =
-            std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
+        let next_frame_time = std::time::Instant::now() +
+            std::time::Duration::from_nanos(16_666_667);
         *control_flow = glutin::event_loop::ControlFlow::WaitUntil(next_frame_time);
 
         match event {
@@ -127,64 +64,21 @@ fn main() {
                 glutin::event::WindowEvent::CloseRequested => {
                     *control_flow = glutin::event_loop::ControlFlow::Exit;
                     return;
-                }
+                },
                 glutin::event::WindowEvent::KeyboardInput { input, .. } => {
                     if let Some(keycode) = input.virtual_keycode {
                         match keycode {
                             glutin::event::VirtualKeyCode::Up => {
-                                // Update the vertex positions
-                                for vertex in &mut shape {
-                                    vertex.position[1] += 0.01; // Update Y coordinate
-                                }
+                                zoom += 0.02;
                             }
                             glutin::event::VirtualKeyCode::Down => {
-                                // Update the vertex positions
-                                for vertex in &mut shape {
-                                    vertex.position[1] -= 0.01; // Update Y coordinate
-                                }
-                            }
-                            glutin::event::VirtualKeyCode::Left => {
-                                // Update the vertex positions
-                                for vertex in &mut shape {
-                                    vertex.position[0] -= 0.01; // Update X coordinate
-                                }
-                            }
-                            glutin::event::VirtualKeyCode::Right => {
-                                // Update the vertex positions
-                                for vertex in &mut shape {
-                                    vertex.position[0] += 0.01; // Update X coordinate
-                                }
+                                zoom -= 0.02;
                             }
                             _ => (),
                         }
-                        vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
                     }
                 }
-                glutin::event::WindowEvent::CursorMoved { position, .. } => {
-                    for vertex in &mut shape {
-                        vertex.position[0] += position.x as f32 / 10000000.0 - 0.005;
-                        // Update X coordinate
-                    }
-                    vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-                }
-                glutin::event::WindowEvent::MouseInput { state, button, .. } => {
-                    match (state, button) {
-                        (glutin::event::ElementState::Released, MouseButton::Left) => {
-                            for vertex in &mut shape {
-                                vertex.position[0] /= 1.2;
-                                vertex.position[1] /= 1.2;
-                            }
-                        }
-                        (glutin::event::ElementState::Released, MouseButton::Right) => {
-                            for vertex in &mut shape {
-                                vertex.position[0] *= 1.2;
-                                vertex.position[1] *= 1.2;
-                            }
-                        }
-                        _ => (),
-                    }
-                }
-                _ => (),
+                _ => return,
             },
             glutin::event::Event::NewEvents(cause) => match cause {
                 glutin::event::StartCause::ResumeTimeReached { .. } => (),
@@ -194,22 +88,14 @@ fn main() {
             _ => return,
         }
 
-        t += 0.002;
-        if t > 0.5 {
-            t = -0.5;
-        }
-
-        // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
-        // log("Print, print, print...", None); <- sets it to the INFO type
-
         let mut target = display.draw();
-        target.clear_color_and_depth(rgb(255, 140, 25), 1.0);
+        target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
-        let matrix = [
-            [0.01, 0.0, 0.0, 0.0],   // translation
-            [0.0, 0.01, 0.0, 0.0],   // scale
-            [0.0, 0.0, 0.01, 0.0],   // perspective x, y, z, scale
-            [0.0, 0.0, 1.5, 1.0f32], // position x, y, z, scale(higher value -> smaller size, samller value -> higher size)
+        let mut matrix = [
+            [0.01, 0.0, 0.0, 0.0],
+            [0.0, 0.01, 0.0, 0.0],
+            [0.0, 0.0, 0.01, 0.0],
+            [0.0, 0.0, zoom, 1.0f32]
         ];
 
         let perspective = {
@@ -223,10 +109,10 @@ fn main() {
             let f = 1.0 / (fov / 2.0).tan();
 
             [
-                [f * aspect_ratio, 0.0, 0.0, 0.0],
-                [0.0, f, 0.0, 0.0],
-                [0.0, 0.0, (zfar + znear) / (zfar - znear), 1.0],
-                [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
+                [f *   aspect_ratio   ,    0.0,              0.0              ,   0.0],
+                [         0.0         ,     f ,              0.0              ,   0.0],
+                [         0.0         ,    0.0,  (zfar+znear)/(zfar-znear)    ,   1.0],
+                [         0.0         ,    0.0, -(2.0*zfar*znear)/(zfar-znear),   0.0],
             ]
         };
 
@@ -236,20 +122,14 @@ fn main() {
             depth: glium::Depth {
                 test: glium::draw_parameters::DepthTest::IfLess,
                 write: true,
-                ..Default::default()
+                .. Default::default()
             },
-            ..Default::default()
+            .. Default::default()
         };
 
-        target
-            .draw(
-                (&positions, &normals),
-                &indices,
-                &program,
-                &uniform! { matrix: matrix, perspective: perspective, u_light: light },
-                &params,
-            )
-            .unwrap();
+        target.draw((&positions, &normals), &indices, &program,
+                    &uniform! { matrix: matrix, perspective: perspective, u_light: light },
+                    &params).unwrap();
         target.finish().unwrap();
     });
 }
