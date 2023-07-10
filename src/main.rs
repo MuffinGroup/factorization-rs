@@ -13,7 +13,7 @@ use glium::{
     Surface,
 };
 use info_types::InfoTypes::*;
-use std::io::Cursor;
+// use std::io::Cursor;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -33,7 +33,7 @@ fn main() {
     struct Vertex {
         position: [f32; 2],
         tex_coords: [f32; 2],
-        rgb: [f32; 3],
+        rgb: [f32; 3], // TODO: !!! Move this to uniforms !!!
     }
 
     // Vertex implementation
@@ -151,6 +151,7 @@ fn main() {
     // execute once
     log("Started succesful", INFO.types());
 
+    /*    
     let image = image::load(
         Cursor::new(&include_bytes!("../resources/textures/test.png")),
         image::ImageFormat::Png,
@@ -161,6 +162,8 @@ fn main() {
     let image =
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
+    */
+    let texture = load_image("resources/textures/test_2.png", &display);
 
     let mut t: f32 = -0.5;
 

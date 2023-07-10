@@ -4,10 +4,16 @@ use std::io::Read;
 use std::io::Cursor;
 use glium::texture::SrgbTexture2d;
 
+use crate::logger::log;
+use crate::info_types::InfoTypes::*;
+
 pub fn load_image(image_path: &str, display: &glium::Display) -> SrgbTexture2d {
     // access the current directory
-    let current_dir = env::current_dir().expect("Failed to get current directory");
-    let full_path = current_dir.join(image_path);
+    let texture_path = concat!(env!("CARGO_MANIFEST_DIR"));
+    let full_path = format!("{}/{}", texture_path, image_path);
+    let logger_path = format!("Loaded image: {}", texture_path);
+
+    log(&logger_path, INFO.types());
 
     // open the image file
     let mut file = File::open(full_path).expect("Failed to open image file");
