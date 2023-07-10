@@ -120,10 +120,6 @@ fn main() {
 
     let mut t: f32 = -0.5;
 
-    for vertex in &mut shape {
-        vertex.position[1] += 1.0;
-    }
-
     // execute always
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
