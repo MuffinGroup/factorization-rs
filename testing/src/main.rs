@@ -1,20 +1,51 @@
-use std::fs::File;
-use std::io::Read;
+use std::{collections::HashMap, io, rc::Rc};
+
+use maplit::hashmap;
 
 fn main() {
-    let test2 = read_file("C:/Users/Admin/rust/factorization-rs/testing/src/vertex_shader.vert");
-    println!("{}", &test2.as_str())
-}
-
-fn read_file(file_name: &str) -> String {
-    let full_path = format!("{}", file_name);
-    let logger_path = format!("Loaded shader: {}", full_path);
-    println!("{}", logger_path);
-    //log(&logger_path, INFO.types());
-    let mut file = File::open(full_path).expect("Failed to open file");
-    let mut file_src = String::new();
-    file.read_to_string(&mut file_src)
+    let mut input = String::new();
+    let language: String;
+    io::stdin()
+        .read_line(&mut input)
         .expect("Failed to read file");
 
-    file_src
+    match input.trim() {
+        "de" => {
+            language = translation_map(Languages::GERMAN);
+        }
+        "en" => {
+            language = translation_map(Languages::ENGLISH);
+        }
+        _ => {
+            language = translation_map(Languages::GERMAN);
+        }
+    }
+
+    println!("{}", language.as_str());
+}
+
+fn translation_map(language: Languages) -> String {
+    let en_us: Rc<HashMap<&'static str, &'static str>> = Rc::new(hashmap! {
+        "TEST" => "test TeST"
+    });
+    let de_de: Rc<HashMap<&'static str, &'static str>> = Rc::new(hashmap! {
+        "TEST" => "deutscher test"
+    });
+
+    #[allow(unused_assignments)]
+    // unused because showcase prototype
+    let mut current_translation = Rc::clone(&en_us);
+    match language {
+        Languages::ENGLISH => {
+            current_translation = Rc::clone(&en_us);
+        }
+        Languages::GERMAN => current_translation = Rc::clone(&de_de),
+    }
+
+    current_translation["TEST"].to_owned()
+}
+
+enum Languages {
+    GERMAN,
+    ENGLISH,
 }
