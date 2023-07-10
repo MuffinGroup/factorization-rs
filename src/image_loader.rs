@@ -11,7 +11,7 @@ pub fn load_image(image_path: &str, display: &glium::Display) -> SrgbTexture2d {
     // access the current directory
     let texture_path = concat!(env!("CARGO_MANIFEST_DIR"));
     let full_path = format!("{}/{}", texture_path, image_path);
-    let logger_path = format!("Loaded image: {}", texture_path);
+    let logger_path = format!("Loaded image: {}", full_path);
 
     log(&logger_path, INFO.types());
 
