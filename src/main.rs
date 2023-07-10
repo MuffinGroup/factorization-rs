@@ -3,7 +3,7 @@ extern crate glium;
 extern crate chrono;
 extern crate image;
 
-mod glsl_reader;
+mod shader_reader;
 mod image_loader;
 mod info_types;
 mod logger;
@@ -13,8 +13,7 @@ use glium::{
     Surface,
 };
 use info_types::InfoTypes::*;
-use std::io::Cursor;
-use std::fs;
+// use std::io::Cursor;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -34,7 +33,7 @@ fn main() {
     struct Vertex {
         position: [f32; 2],
         tex_coords: [f32; 2],
-        rgb: [f32; 3]
+        rgb: [f32; 3], // TODO: !!! Move this to uniforms !!!
     }
 
     // Vertex implementation
@@ -44,48 +43,79 @@ fn main() {
     let vertex1 = Vertex {
         position: [-0.5, -0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex2 = Vertex {
         position: [0.0, 0.5],
         tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex3 = Vertex {
         position: [0.5, -0.25],
         tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
 
     let vertex4 = Vertex {
         position: [0.0, -0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex5 = Vertex {
         position: [0.5, 0.5],
         tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex6 = Vertex {
         position: [-0.5, 0.0],
         tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex7 = Vertex {
         position: [0.0, 0.5],
         tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex8 = Vertex {
         position: [-0.5, 0.0],
         tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0]
+        rgb: [1.0, 1.0, 1.0],
     };
     let vertex9 = Vertex {
         position: [0.5, 0.0],
         tex_coords: [1.0, 0.0],
-        rgb: [0.0, 0.0, 1.0]
+        rgb: [0.0, 0.0, 1.0],
+    };
+
+    let square_vertex1 = Vertex {
+        position: [-0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 0.0, 1.0],
+    };
+    let square_vertex2 = Vertex {
+        position: [-0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [0.0, 1.0, 1.0],
+    };
+    let square_vertex3 = Vertex {
+        position: [0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 0.0],
+    };
+    let square_vertex4 = Vertex {
+        position: [0.5, -0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 0.0, 1.0],
+    };
+    let square_vertex5 = Vertex {
+        position: [-0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [0.0, 1.0, 1.0],
+    };
+    let square_vertex6 = Vertex {
+        position: [0.5, 0.5],
+        tex_coords: [0.0, 0.0],
+        rgb: [1.0, 1.0, 0.0],
     };
 
     let mut shape = vec![vertex1, vertex2, vertex3];
@@ -95,72 +125,47 @@ fn main() {
     let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
-    let vertex_shader = 
-    r#"
-        #version 140
+    let shape3 = vec![
+        square_vertex1,
+        square_vertex2,
+        square_vertex3,
+        square_vertex4,
+        square_vertex5,
+        square_vertex6,
+    ];
+    let vertex_buffer_shape_3 = glium::VertexBuffer::new(&display, &shape3).unwrap();
 
-        in vec2 position;
-        in vec2 tex_coords;
-        in vec3 rgb;
-        out vec3 color_attribute;
-        out vec2 v_tex_coords;
-    
-        uniform mat4 matrix;
-    
-        void main() {
-            color_attribute = rgb;
-            v_tex_coords = tex_coords;
-            gl_Position = matrix * vec4(position, 0.0, 1.0);
-        }
-    "#;
+    let vertex_shader = &shader_reader::read("vertex_shader.vert");
 
-    let fragment_shader_texture = r#"
-        #version 140
+    let fragment_shader_texture = &shader_reader::read("fragment_shader_texture.frag");
 
-        in vec2 v_tex_coords;
-        out vec4 color;
-    
-        uniform sampler2D tex;
-    
-        void main() {
-            color = texture(tex, v_tex_coords);
-        }
-    "#;
-
-    let fragment_shader_color = r#"
-        #version 140
-
-        out vec4 color;
-        in vec3 color_attribute;
-
-        void main() {
-            color = vec4(color_attribute, 1.0);
-        }
-    "#;
+    let fragment_shader_color = &shader_reader::read("fragment_shader_color.frag");
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
             .unwrap();
 
     let program_2 =
-        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None)
-            .unwrap();
+        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None).unwrap();
 
     // execute once
     log("Started succesful", INFO.types());
 
-
-    let image = image::load(Cursor::new(&include_bytes!("../resources/textures/test.png")),
-                            image::ImageFormat::Png).unwrap().to_rgba8();
+    /*    
+    let image = image::load(
+        Cursor::new(&include_bytes!("../resources/textures/test.png")),
+        image::ImageFormat::Png,
+    )
+    .unwrap()
+    .to_rgba8();
     let image_dimensions = image.dimensions();
-    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+    let image =
+        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
+    */
+    let texture = load_image("resources/textures/test_2.png", &display);
 
     let mut t: f32 = -0.5;
-
-    for vertex in &mut shape {
-        vertex.position[1] += 1.0;
-    }
 
     // execute always
     event_loop.run(move |event, _, control_flow| {
@@ -200,6 +205,11 @@ fn main() {
                                 for vertex in &mut shape {
                                     vertex.position[0] += 0.01; // Update X coordinate
                                 }
+                            }
+                            glutin::event::VirtualKeyCode::Escape => {
+                                *control_flow = glutin::event_loop::ControlFlow::Exit;
+                                log("Exited succesfully", INFO.types());
+                                return;
                             }
                             _ => (),
                         }
@@ -279,12 +289,16 @@ fn main() {
                 &Default::default(),
             )
             .unwrap();
+
+        target
+            .draw(
+                &vertex_buffer_shape_3,
+                &indices,
+                &program_2,
+                &uniforms,
+                &Default::default(),
+            )
+            .unwrap();
         target.finish().unwrap();
     });
-}
-
-fn load_shader_source(filename: &str) -> String {
-    let shader_code = fs::read_to_string(filename)
-        .expect("Failed to load shader source code");
-    shader_code
 }
