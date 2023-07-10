@@ -14,7 +14,6 @@ use glium::{
 };
 use info_types::InfoTypes::*;
 use std::io::Cursor;
-use std::fs;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -95,48 +94,11 @@ fn main() {
     let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
     let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
 
-    let vertex_shader = 
-    r#"
-        #version 140
+    let vertex_shader = &glsl_reader::read("vertex_shader.vert");
 
-        in vec2 position;
-        in vec2 tex_coords;
-        in vec3 rgb;
-        out vec3 color_attribute;
-        out vec2 v_tex_coords;
-    
-        uniform mat4 matrix;
-    
-        void main() {
-            color_attribute = rgb;
-            v_tex_coords = tex_coords;
-            gl_Position = matrix * vec4(position, 0.0, 1.0);
-        }
-    "#;
+    let fragment_shader_texture = &glsl_reader::read("fragment_shader_texture.frag");
 
-    let fragment_shader_texture = r#"
-        #version 140
-
-        in vec2 v_tex_coords;
-        out vec4 color;
-    
-        uniform sampler2D tex;
-    
-        void main() {
-            color = texture(tex, v_tex_coords);
-        }
-    "#;
-
-    let fragment_shader_color = r#"
-        #version 140
-
-        out vec4 color;
-        in vec3 color_attribute;
-
-        void main() {
-            color = vec4(color_attribute, 1.0);
-        }
-    "#;
+    let fragment_shader_color = &glsl_reader::read("fragment_shader_color.frag");
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
@@ -281,10 +243,4 @@ fn main() {
             .unwrap();
         target.finish().unwrap();
     });
-}
-
-fn load_shader_source(filename: &str) -> String {
-    let shader_code = fs::read_to_string(filename)
-        .expect("Failed to load shader source code");
-    shader_code
 }
