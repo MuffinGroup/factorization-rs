@@ -3,7 +3,7 @@ extern crate glium;
 extern crate chrono;
 extern crate image;
 
-mod glsl_reader;
+mod shader_reader;
 mod image_loader;
 mod info_types;
 mod logger;
@@ -135,11 +135,11 @@ fn main() {
     ];
     let vertex_buffer_shape_3 = glium::VertexBuffer::new(&display, &shape3).unwrap();
 
-    let vertex_shader = &glsl_reader::read("vertex_shader.vert");
+    let vertex_shader = &shader_reader::read("vertex_shader.vert");
 
-    let fragment_shader_texture = &glsl_reader::read("fragment_shader_texture.frag");
+    let fragment_shader_texture = &shader_reader::read("fragment_shader_texture.frag");
 
-    let fragment_shader_color = &glsl_reader::read("fragment_shader_color.frag");
+    let fragment_shader_color = &shader_reader::read("fragment_shader_color.frag");
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
@@ -205,6 +205,7 @@ fn main() {
                             }
                             glutin::event::VirtualKeyCode::Escape => {
                                 *control_flow = glutin::event_loop::ControlFlow::Exit;
+                                log("Exited succesfully", INFO.types());
                                 return;
                             }
                             _ => (),
