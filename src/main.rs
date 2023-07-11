@@ -163,7 +163,8 @@ fn main() {
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
     */
-    let texture = load_image("resources/textures/test_2.png", &display);
+    let texture_bytes = include_bytes!("../resources/textures/test_2.png");
+    let texture = load_image(texture_bytes, &display);
 
     let mut t: f32 = -0.5;
 
