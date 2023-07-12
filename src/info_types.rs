@@ -6,7 +6,7 @@ pub enum InfoTypes {
 }
 
 impl InfoTypes {
-    pub fn types(&self) -> &str {
+    pub fn literal(&self) -> &str {
         match self {
             InfoTypes::INFO => "Info",
             InfoTypes::ERROR => "Error",

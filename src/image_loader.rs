@@ -6,7 +6,7 @@ use crate::info_types::InfoTypes::*;
 
 pub fn load_image(image_bytes: &[u8], image_name: &str, display: &glium::Display) -> SrgbTexture2d {
     let logger_path = format!("Loaded image: {}", image_name);
-    log(&logger_path, INFO.types());
+    log(&logger_path, INFO.literal());
 
     // Load the image from the byte slice
     let image = image::load(Cursor::new(image_bytes), image::ImageFormat::Png)

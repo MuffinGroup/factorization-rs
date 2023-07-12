@@ -13,7 +13,6 @@ use glium::{
     Surface,
 };
 use info_types::InfoTypes::*;
-// use std::io::Cursor;
 
 use crate::{image_loader::load_image, logger::log};
 
@@ -152,26 +151,13 @@ fn main() {
     let program_2 =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None).unwrap();
 
-
-    /*    
-    let image = image::load(
-        Cursor::new(&include_bytes!("../resources/textures/test.png")),
-        image::ImageFormat::Png,
-    )
-    .unwrap()
-    .to_rgba8();
-    let image_dimensions = image.dimensions();
-    let image =
-        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
-    */
     let texture_bytes = include_bytes!("../resources/textures/test_2.png");
     let texture = load_image(texture_bytes, "test2", &display);
 
     let mut t: f32 = -0.5;
 
     // execute once
-    log("Started succesful", INFO.types());
+    log("Started succesful", INFO.literal());
     
     // execute always
     event_loop.run(move |event, _, control_flow| {
@@ -214,7 +200,7 @@ fn main() {
                             }
                             glutin::event::VirtualKeyCode::Escape => {
                                 *control_flow = glutin::event_loop::ControlFlow::Exit;
-                                log("Exited succesfully", INFO.types());
+                                log("Exited succesfully", INFO.literal());
                                 return;
                             }
                             _ => (),
@@ -260,9 +246,6 @@ fn main() {
         if t > 0.5 {
             t = -0.5;
         }
-
-        // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
-        // log("Print, print, print...", None); <- sets it to the INFO type
 
         let mut target = display.draw();
         target.clear_color(0.0, 1.0, 1.0, 1.0);

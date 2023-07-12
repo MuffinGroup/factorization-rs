@@ -3,7 +3,7 @@ use crate::info_types::InfoTypes::*;
 
 pub fn read(file_bytes: &str, file_name: &str) -> String {
     let logger_path = format!("Loaded shader: {}", file_name);
-    log(&logger_path, INFO.types());
+    log(&logger_path, INFO.literal());
     
     file_bytes.to_string()
 }
