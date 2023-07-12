@@ -90,32 +90,32 @@ fn main() {
     let square_vertex1 = Vertex {
         position: [-0.5, -0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 0.0, 1.0],
+        rgb: [0.0, 0.0, 0.0],
     };
     let square_vertex2 = Vertex {
         position: [-0.5, 0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [0.0, 1.0, 1.0],
+        rgb: [0.0, 0.0, 0.0],
     };
     let square_vertex3 = Vertex {
         position: [0.5, -0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 0.0],
+        rgb: [1.0, 1.0, 1.0],
     };
     let square_vertex4 = Vertex {
         position: [0.5, -0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 0.0, 1.0],
+        rgb: [1.0, 1.0, 1.0],
     };
     let square_vertex5 = Vertex {
         position: [-0.5, 0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [0.0, 1.0, 1.0],
+        rgb: [0.0, 0.0, 0.0],
     };
     let square_vertex6 = Vertex {
         position: [0.5, 0.5],
         tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 0.0],
+        rgb: [1.0, 1.0, 1.0],
     };
 
     let mut shape = vec![vertex1, vertex2, vertex3];
@@ -135,11 +135,15 @@ fn main() {
     ];
     let vertex_buffer_shape_3 = glium::VertexBuffer::new(&display, &shape3).unwrap();
 
-    let vertex_shader = &shader_reader::read("vertex_shader.vert");
+    let vertex_shader_src = include_str!("../resources/shaders/vertex_shader.vert");
+    let fragment_shader_color_src = include_str!("../resources/shaders/fragment_shader_color.frag");
+    let fragment_shader_texture_src = include_str!("../resources/shaders/fragment_shader_texture.frag");
 
-    let fragment_shader_texture = &shader_reader::read("fragment_shader_texture.frag");
+    let vertex_shader = &shader_reader::read(vertex_shader_src, "vertex_shader");
 
-    let fragment_shader_color = &shader_reader::read("fragment_shader_color.frag");
+    let fragment_shader_texture = &shader_reader::read(fragment_shader_texture_src, "fragment_shader_texture");
+
+    let fragment_shader_color = &shader_reader::read(fragment_shader_color_src ,"fragment_shader_color.frag");
 
     let program =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
@@ -148,8 +152,6 @@ fn main() {
     let program_2 =
         glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None).unwrap();
 
-    // execute once
-    log("Started succesful", INFO.types());
 
     /*    
     let image = image::load(
@@ -163,10 +165,14 @@ fn main() {
         glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
     let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
     */
-    let texture = load_image("resources/textures/test_2.png", &display);
+    let texture_bytes = include_bytes!("../resources/textures/test_2.png");
+    let texture = load_image(texture_bytes, "test2", &display);
 
     let mut t: f32 = -0.5;
 
+    // execute once
+    log("Started succesful", INFO.types());
+    
     // execute always
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =

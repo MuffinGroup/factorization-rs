@@ -1,18 +1,26 @@
-use std::fs::File;
-use std::io::Read;
-
 use crate::logger::log;
 use crate::info_types::InfoTypes::*;
 
-pub fn read(file_name: &str) -> String {
-    let shader_path = concat!(env!("CARGO_MANIFEST_DIR"), "/resources/shaders");
-    let full_path = format!("{}/{}", shader_path, file_name);
-    let logger_path = format!("Loaded shader: {}", full_path);
+pub fn read(file_bytes: &str, file_name: &str) -> String {
+    let logger_path = format!("Loaded shader: {}", file_name);
     log(&logger_path, INFO.types());
-    let mut file = File::open(full_path).expect("Failed to open file");
-    let mut file_src = String::new();
-    file.read_to_string(&mut file_src)
-        .expect("Failed to read file");
-
-    file_src
+    
+    file_bytes.to_string()
 }
+
+/*
+    let logger_path = "Loaded image: <embedded>".to_string();
+    log(&logger_path, INFO.types());
+
+    // Load the image from the byte slice
+    let image = image::load(Cursor::new(image_bytes), image::ImageFormat::Png)
+        .unwrap()
+        .to_rgba8();
+
+    let image_dimensions = image.dimensions();
+    let image = glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
+
+    // Convert to texture
+    let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
+    texture
+*/
