@@ -4,8 +4,8 @@ use glium::texture::SrgbTexture2d;
 use crate::logger::log;
 use crate::info_types::InfoTypes::*;
 
-pub fn load_image(image_bytes: &[u8], display: &glium::Display) -> SrgbTexture2d {
-    let logger_path = "Loaded image: <embedded>".to_string();
+pub fn load_image(image_bytes: &[u8], image_name: &str, display: &glium::Display) -> SrgbTexture2d {
+    let logger_path = format!("Loaded image: {}", image_name);
     log(&logger_path, INFO.types());
 
     // Load the image from the byte slice
