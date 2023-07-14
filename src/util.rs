@@ -1,16 +1,12 @@
+use std::io::Cursor;
+use glium::texture::SrgbTexture2d;
+
 use crate::logger::log;
 use crate::info_types::InfoTypes::*;
 
-pub fn read(file_bytes: &str, file_name: &str) -> String {
-    let logger_path = format!("Loaded shader: {}", file_name);
+pub fn load_image(image_bytes: &[u8], image_name: &str, display: &glium::Display) -> SrgbTexture2d {
+    let logger_path = format!("Loaded image: {}", image_name);
     log(&logger_path, INFO.literal());
-    
-    file_bytes.to_string()
-}
-
-/*
-    let logger_path = "Loaded image: <embedded>".to_string();
-    log(&logger_path, INFO.types());
 
     // Load the image from the byte slice
     let image = image::load(Cursor::new(image_bytes), image::ImageFormat::Png)
@@ -23,4 +19,11 @@ pub fn read(file_bytes: &str, file_name: &str) -> String {
     // Convert to texture
     let texture = glium::texture::SrgbTexture2d::new(display, image).unwrap();
     texture
-*/
+}
+
+pub fn load_shader(file_bytes: &str, file_name: &str) -> String {
+    let logger_path = format!("Loaded shader: {}", file_name);
+    log(&logger_path, INFO.literal());
+    
+    file_bytes.to_string()
+}

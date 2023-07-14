@@ -3,8 +3,7 @@ extern crate glium;
 extern crate chrono;
 extern crate image;
 
-mod shader_reader;
-mod image_loader;
+mod util;
 mod info_types;
 mod logger;
 
@@ -14,7 +13,7 @@ use glium::{
 };
 use info_types::InfoTypes::*;
 
-use crate::{image_loader::load_image, logger::log};
+use crate::{util::*, logger::log};
 
 fn main() {
     // event loop creation
@@ -138,18 +137,18 @@ fn main() {
     let fragment_shader_color_src = include_str!("../resources/shaders/fragment_shader_color.frag");
     let fragment_shader_texture_src = include_str!("../resources/shaders/fragment_shader_texture.frag");
 
-    let vertex_shader = &shader_reader::read(vertex_shader_src, "vertex_shader");
+    let vertex_shader = load_shader(vertex_shader_src, "vertex_shader");
 
-    let fragment_shader_texture = &shader_reader::read(fragment_shader_texture_src, "fragment_shader_texture");
+    let fragment_shader_texture = load_shader(fragment_shader_texture_src, "fragment_shader_texture");
 
-    let fragment_shader_color = &shader_reader::read(fragment_shader_color_src ,"fragment_shader_color.frag");
+    let fragment_shader_color = load_shader(fragment_shader_color_src ,"fragment_shader_color.frag");
 
     let program =
-        glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
+        glium::Program::from_source(&display, &vertex_shader, &fragment_shader_texture, None)
             .unwrap();
 
     let program_2 =
-        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None).unwrap();
+        glium::Program::from_source(&display, &vertex_shader, &fragment_shader_color, None).unwrap();
 
     let texture_bytes = include_bytes!("../resources/textures/test_2.png");
     let texture = load_image(texture_bytes, "test2", &display);
