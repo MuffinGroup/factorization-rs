@@ -1,23 +1,14 @@
 #[macro_use]
+#[allow(macro_use_extern_crate)]
 extern crate glium;
-extern crate chrono;
-extern crate image;
-
-mod shader_reader;
-mod image_loader;
-mod info_types;
-mod logger;
-
-use glium::{
-    glutin::{self, event::MouseButton},
-    Surface,
-};
-use info_types::InfoTypes::*;
-// use std::io::Cursor;
-
-use crate::{image_loader::load_image, logger::log};
 
 mod teapot;
+#[macro_use]
+mod logger;
+mod util;
+mod colors;
+
+use util::*;
 
 fn main() {
     #[allow(unused_imports)]
@@ -28,14 +19,6 @@ fn main() {
     let cb = glutin::ContextBuilder::new().with_depth_buffer(24);
     let display = glium::Display::new(wb, cb, &event_loop).unwrap();
 
-    #[derive(Copy, Clone)]
-    // Vertex struct creation
-    struct Vertex {
-        position: [f32; 2],
-        tex_coords: [f32; 2],
-        rgb: [f32; 3], // TODO: !!! Move this to uniforms !!!
-    }
-  
     let positions = glium::VertexBuffer::new(&display, &teapot::VERTICES).unwrap();
     let normals = glium::VertexBuffer::new(&display, &teapot::NORMALS).unwrap();
     let indices = glium::IndexBuffer::new(
@@ -47,178 +30,18 @@ fn main() {
 
     let mut zoom = 10.0;
 
-    let vertex_shader_src = r#"
-    #version 140
-
-    in vec3 position;
-    in vec3 normal;
-    
-    out vec3 v_normal;
-    
-    uniform mat4 perspective;
-    uniform mat4 view;
-    uniform mat4 model;
-    
-    void main() {
-        mat4 modelview = view * model;
-        v_normal = transpose(inverse(mat3(modelview))) * normal;
-        gl_Position = perspective * modelview * vec4(position, 1.0);
-    }
-    "#;
-  
-    // Vertex implementation
-    implement_vertex!(Vertex, position, tex_coords, rgb);
-
-    // Vertex properties
-    let vertex1 = Vertex {
-        position: [-0.5, -0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex2 = Vertex {
-        position: [0.0, 0.5],
-        tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex3 = Vertex {
-        position: [0.5, -0.25],
-        tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-
-    let vertex4 = Vertex {
-        position: [0.0, -0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex5 = Vertex {
-        position: [0.5, 0.5],
-        tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex6 = Vertex {
-        position: [-0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex7 = Vertex {
-        position: [0.0, 0.5],
-        tex_coords: [0.0, 1.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex8 = Vertex {
-        position: [-0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let vertex9 = Vertex {
-        position: [0.5, 0.0],
-        tex_coords: [1.0, 0.0],
-        rgb: [0.0, 0.0, 1.0],
-    };
-
-    let square_vertex1 = Vertex {
-        position: [-0.5, -0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [0.0, 0.0, 0.0],
-    };
-    let square_vertex2 = Vertex {
-        position: [-0.5, 0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [0.0, 0.0, 0.0],
-    };
-    let square_vertex3 = Vertex {
-        position: [0.5, -0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let square_vertex4 = Vertex {
-        position: [0.5, -0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-    let square_vertex5 = Vertex {
-        position: [-0.5, 0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [0.0, 0.0, 0.0],
-    };
-    let square_vertex6 = Vertex {
-        position: [0.5, 0.5],
-        tex_coords: [0.0, 0.0],
-        rgb: [1.0, 1.0, 1.0],
-    };
-
-    let mut shape = vec![vertex1, vertex2, vertex3];
-    let mut vertex_buffer = glium::VertexBuffer::new(&display, &shape).unwrap();
-    let indices = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
-
-    let shape2 = vec![vertex4, vertex5, vertex6, vertex7, vertex8, vertex9];
-    let vertex_buffer_shape_2 = glium::VertexBuffer::new(&display, &shape2).unwrap();
-
-    let shape3 = vec![
-        square_vertex1,
-        square_vertex2,
-        square_vertex3,
-        square_vertex4,
-        square_vertex5,
-        square_vertex6,
-    ];
-    let vertex_buffer_shape_3 = glium::VertexBuffer::new(&display, &shape3).unwrap();
-
     let vertex_shader_src = include_str!("../resources/shaders/vertex_shader.vert");
-    let fragment_shader_color_src = include_str!("../resources/shaders/fragment_shader_color.frag");
-    let fragment_shader_texture_src = include_str!("../resources/shaders/fragment_shader_texture.frag");
+    let vertex_shader = &load_shader(vertex_shader_src, "vertex_shader.vert");
 
-    let vertex_shader = &shader_reader::read(vertex_shader_src, "vertex_shader");
-
-    let fragment_shader_texture = &shader_reader::read(fragment_shader_texture_src, "fragment_shader_texture");
-
-    let fragment_shader_color = &shader_reader::read(fragment_shader_color_src ,"fragment_shader_color.frag");
-
-    let fragment_shader_src = r#"
-        #version 150
-
-        in vec3 v_normal;
-        out vec4 color;
-        uniform vec3 u_light;
-
-        void main() {
-            float brightness = dot(normalize(v_normal), normalize(u_light));
-            vec3 dark_color = vec3(0.6, 0.0, 0.0);
-            vec3 regular_color = vec3(1.0, 0.0, 0.0);
-            color = vec4(mix(dark_color, regular_color, brightness), 1.0);
-        }
-    "#;
+    let fragment_shader_src = include_str!("../resources/shaders/fragment_shader.frag");
+    let fragment_shader = &load_shader(fragment_shader_src, "fragment_shader.frag");
 
     let program =
-        glium::Program::from_source(&display, vertex_shader, fragment_shader_texture, None)
+        glium::Program::from_source(&display, vertex_shader, fragment_shader, None)
             .unwrap();
 
-    let program_2 =
-        glium::Program::from_source(&display, vertex_shader, fragment_shader_color, None).unwrap();
+    log!("Started sucessful");
 
-
-    /*    
-    let image = image::load(
-        Cursor::new(&include_bytes!("../resources/textures/test.png")),
-        image::ImageFormat::Png,
-    )
-    .unwrap()
-    .to_rgba8();
-    let image_dimensions = image.dimensions();
-    let image =
-        glium::texture::RawImage2d::from_raw_rgba_reversed(&image.into_raw(), image_dimensions);
-    let texture = glium::texture::SrgbTexture2d::new(&display, image).unwrap();
-    */
-    let texture_bytes = include_bytes!("../resources/textures/test_2.png");
-    let texture = load_image(texture_bytes, "test2", &display);
-
-    let mut t: f32 = -0.5;
-
-    // execute once
-    log("Started succesful", INFO.types());
-    
-    // execute always
     event_loop.run(move |event, _, control_flow| {
         let next_frame_time =
             std::time::Instant::now() + std::time::Duration::from_nanos(16_666_667);
@@ -239,11 +62,6 @@ fn main() {
                             glutin::event::VirtualKeyCode::Down => {
                                 zoom -= 0.02;
                             }
-                            glutin::event::VirtualKeyCode::Escape => {
-                                *control_flow = glutin::event_loop::ControlFlow::Exit;
-                                log("Exited succesfully", INFO.types());
-                                return;
-                            }
                             _ => (),
                         }
                     }
@@ -258,20 +76,6 @@ fn main() {
             _ => return,
         }
 
-        // log("This is being printed every tick", Some(InfoTypes::WARNING.info_type()));
-        // log("Print, print, print...", None); <- sets it to the INFO type
-
-        let mut target = display.draw();
-        target.clear_color(0.0, 1.0, 1.0, 1.0);
-
-        let uniforms = uniform! {
-            matrix: [
-                [1.0, 0.0, 0.0, 0.0],
-                [0.0, 1.0, 0.0, 0.0],
-                [0.0, 0.0, 1.0, 0.0],
-                [ t , 0.0, 0.0, 1.0f32],
-            ],
-            tex: &texture
         let mut target = display.draw();
         target.clear_color_and_depth((0.0, 0.0, 1.0, 1.0), 1.0);
 
