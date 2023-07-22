@@ -55,6 +55,7 @@ pub fn get_shape() -> Vec<Vertex> {
         rgb: [1.0, 1.0, 1.0],
     };
 
+    #[allow(unused_variables)]
     let square_shape = vec![
         square_vertex1,
         square_vertex2,

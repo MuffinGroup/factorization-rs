@@ -34,7 +34,7 @@ fn main() {
 
     let square_shape = get_shape();
 
-    let mut vertex_buffer = glium::VertexBuffer::new(&display, &square_shape).unwrap();
+    let vertex_buffer = glium::VertexBuffer::new(&display, &square_shape).unwrap();
     let indices_2d = glium::index::NoIndices(glium::index::PrimitiveType::TrianglesList);
 
     let example_image_src = include_bytes!("../resources/textures/test.png");
