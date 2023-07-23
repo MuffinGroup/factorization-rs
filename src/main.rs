@@ -90,10 +90,10 @@ fn main() {
                     if let Some(keycode) = input.virtual_keycode {
                         match keycode {
                             glutin::event::VirtualKeyCode::Up => {
-                                zoom += 0.02;
+                                zoom += 0.2;
                             }
                             glutin::event::VirtualKeyCode::Down => {
-                                zoom -= 0.02;
+                                zoom -= 0.2;
                             }
                             _ => (),
                         }
