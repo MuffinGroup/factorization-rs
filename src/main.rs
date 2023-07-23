@@ -69,9 +69,13 @@ fn main() {
         glium::Program::from_source(&display, &vertex_shader_color, &fragment_shader_color, None)
             .unwrap();
 
-    let program_texture =
-        glium::Program::from_source(&display, &vertex_shader_texture, &fragment_shader_texture, None)
-            .unwrap();
+    let program_texture = glium::Program::from_source(
+        &display,
+        &vertex_shader_texture,
+        &fragment_shader_texture,
+        None,
+    )
+    .unwrap();
 
     log!("Started sucessful");
 
@@ -131,12 +135,12 @@ fn main() {
         };
 
         let model = [
-            [0.01, 0.0, 0.0, 0.0],
-            [0.0, 0.01, 0.0, 0.0],
-            [0.0, 0.0, 0.01, 0.0],
-            [0.0, 0.0, 2.0, 1.0f32],
+            [0.0,    0.0,  -1.0,  0.0], // X-axis rotation (no change to X-axis values)
+            [0.0,    1.0,   0.0,  0.0], // Y-axis rotation (no change to Y-axis values)
+            [1.0,    0.0,   0.0,  0.0], // Z-axis rotation (no change to Z-axis values)
+            [0.0,    0.0,   0.0,  2.0f32], // Translation along the Z-axis (2.0)
         ];
-
+        
         let perspective = {
             let (width, height) = target.get_dimensions();
             let aspect_ratio = height as f32 / width as f32;
@@ -160,10 +164,10 @@ fn main() {
             depth: glium::Depth {
                 test: glium::DepthTest::IfLess,
                 write: true,
-                ..Default::default()
+                .. Default::default()
             },
             backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
-            ..Default::default()
+            .. Default::default()
         };
 
         let view = view_matrix(&[2.0, -1.0, 1.0], &[-2.0, 1.0, 1.0], &[0.0, 1.0, 0.0], zoom);
