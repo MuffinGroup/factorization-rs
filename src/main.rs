@@ -157,7 +157,6 @@ fn main() {
                         write: true,
                         .. Default::default()
                     },
-                    backface_culling: glium::draw_parameters::BackfaceCullingMode::CullClockwise,
                     .. Default::default()
                 };
         
@@ -193,6 +192,9 @@ fn main() {
                     .unwrap();
                 target.finish().unwrap();
             }
+            glutin::event::Event::RedrawEventsCleared => {
+                display.gl_window().window().request_redraw();
+            },
             _ => {}
         }
     });
