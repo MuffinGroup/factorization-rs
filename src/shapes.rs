@@ -7,6 +7,7 @@ pub struct Vertex {
 
 implement_vertex!(Vertex, position, tex_coords, rgb);
 
+#[allow(unused_variables)]
 pub fn get_shape() -> Vec<Vertex> {
     let square_vertex1 = Vertex {
         position: [-0.5, -0.5],
@@ -55,14 +56,38 @@ pub fn get_shape() -> Vec<Vertex> {
         rgb: [1.0, 1.0, 1.0],
     };
 
-    #[allow(unused_variables)]
     let square_shape = vec![
-        square_vertex1,
-        square_vertex2,
-        square_vertex3,
-        square_vertex4,
-        square_vertex5,
-        square_vertex6,
+        Vertex {
+            position: [-0.5, -0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [0.0, 0.0]
+        },
+        Vertex {
+            position: [ 0.5, -0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [1.0, 0.0] 
+        },
+        Vertex {
+            position: [ 0.5,  0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [1.0, 1.0]
+        },
+    
+        Vertex { 
+            position: [ 0.5,  0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [1.0, 1.0] 
+        },
+        Vertex { 
+            position: [-0.5,  0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [0.0, 1.0] 
+        },
+        Vertex { 
+            position: [-0.5, -0.5],
+            rgb: [1.0, 1.0, 1.0],
+            tex_coords: [0.0, 0.0]
+        },
     ];
 
     let triangle_shape = vec![
@@ -71,5 +96,5 @@ pub fn get_shape() -> Vec<Vertex> {
         vertex3
     ];
     // square_shape // returns the square shape
-    triangle_shape
+    square_shape
 }

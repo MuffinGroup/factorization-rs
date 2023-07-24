@@ -97,6 +97,7 @@ fn main() {
                             glutin::event::VirtualKeyCode::Down => {
                                 zoom -= 0.2;
                             }
+                            
                             _ => (),
                         }
                     }
@@ -149,7 +150,7 @@ fn main() {
                         [0.0, 0.0, -(2.0 * zfar * znear) / (zfar - znear), 0.0],
                     ]
                 };
-                let light = [-1.0, 0.4, 0.9f32];
+                let light = [1.4, 0.4, -0.7f32];
         
                 let params = glium::DrawParameters {
                     depth: glium::Depth {
@@ -200,4 +201,3 @@ fn main() {
         }
     });
 }
-
