@@ -156,6 +156,7 @@ fn main() {
                         test: glium::DepthTest::IfLess,
                         write: true,
                         .. Default::default()
+                        // TODO: Readd backface culling
                     },
                     .. Default::default()
                 };
