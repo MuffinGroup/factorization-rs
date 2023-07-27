@@ -179,11 +179,15 @@ pub async fn run() {
                     } => *control_flow = ControlFlow::Exit,
                     WindowEvent::CursorMoved { position, ..} => {
                         println!("{:?}", position);
+                        println!("{}", red);
+                        red += (position.x - 400.0) / 50000.0;
+                        /*
                         if position.x > 400.0 && red > 0.0 {
                             red -= 0.001;
                         } else if position.x < 400.0 && red < 1.0 {
                             red += 0.001;
                         }
+                        */
                     }
                     WindowEvent::Resized(physical_size) => {
                         state.resize(*physical_size);
