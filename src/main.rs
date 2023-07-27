@@ -1,5 +1,7 @@
+extern crate pollster;
+
 use factorization::run;
 
 fn main() {
-    run();
+    pollster::block_on(run())
 }
