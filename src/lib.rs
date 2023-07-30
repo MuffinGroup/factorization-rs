@@ -8,9 +8,10 @@ use winit::{
 
 mod state;
 
-use state::State;
+use state::State;    
 
 pub async fn run() {
+
     let event_loop = EventLoop::new();
 
     let window = WindowBuilder::new().build(&event_loop).unwrap();
