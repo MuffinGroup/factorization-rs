@@ -11,7 +11,8 @@ pub struct State {
     pub window: Window,
 
     pub render_pipeline: wgpu::RenderPipeline,
-    pub vertex_buffer: wgpu::Buffer
+    pub vertex_buffer: wgpu::Buffer,
+    pub num_vertices: u32,
 }
 
 #[repr(C)]
@@ -38,6 +39,8 @@ impl State {
             backends: wgpu::Backends::all(),
             dx12_shader_compiler: Default::default(),
         });
+
+        let num_vertices = VERTICES.len() as u32;
 
         // # Safety
         //
@@ -108,7 +111,7 @@ impl State {
             vertex: wgpu::VertexState {
                 module: &shader,
                 entry_point: "vs_main",
-                buffers: &[],
+                buffers: &[Vertex::desc()],
             },
             fragment: Some(wgpu::FragmentState {
                 module: &shader,
@@ -156,7 +159,8 @@ impl State {
             config,
             size,
             render_pipeline,
-            vertex_buffer
+            vertex_buffer,
+            num_vertices
         }
     }
 
@@ -212,7 +216,8 @@ impl State {
             });
 
             render_pass.set_pipeline(&self.render_pipeline);
-            render_pass.draw(0..3, 0..1);
+            render_pass.set_vertex_buffer(0, self.vertex_buffer.slice(..));
+            render_pass.draw(0..self.num_vertices, 0..1);
         }
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();
@@ -222,5 +227,20 @@ impl State {
 }
 
 impl Vertex {
-    
+    pub const ATTRIBS: [wgpu::VertexAttribute; 2] =
+        wgpu::vertex_attr_array![0 => Float32x3, 1 => Float32x3];
+
+    pub fn desc() -> wgpu::VertexBufferLayout<'static> {
+        use std::mem;
+
+        wgpu::VertexBufferLayout {
+            array_stride: mem::size_of::<Self>() as wgpu::BufferAddress,
+            step_mode: wgpu::VertexStepMode::Vertex,
+            attributes: &Self::ATTRIBS,
+        }
+    }
 }
+
+ 
+
+ 
