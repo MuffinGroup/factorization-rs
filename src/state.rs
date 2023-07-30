@@ -132,7 +132,7 @@ impl State {
             queue,
             config,
             size,
-            render_pipeline
+            render_pipeline,
         }
     }
 
@@ -169,7 +169,7 @@ impl State {
             });
 
         {
-            let _render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
+            let mut render_pass = encoder.begin_render_pass(&wgpu::RenderPassDescriptor {
                 label: Some("Render Pass"),
                 color_attachments: &[Some(wgpu::RenderPassColorAttachment {
                     view: &view,
@@ -186,6 +186,9 @@ impl State {
                 })],
                 depth_stencil_attachment: None,
             });
+
+            render_pass.set_pipeline(&self.render_pipeline);
+            render_pass.draw(0..3, 0..1)
         }
         self.queue.submit(std::iter::once(encoder.finish()));
         output.present();
