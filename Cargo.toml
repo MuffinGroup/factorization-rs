@@ -6,8 +6,9 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-anyhow = "1.0"
+anyhow = "*"
 bytemuck = { version = "1.12", features = [ "derive" ] }
+cgmath = "*"
 chrono = "*"
 env_logger = "*"
 image = {version = "*", default-features = false, features = ["png"]}

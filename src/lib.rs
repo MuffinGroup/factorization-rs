@@ -8,6 +8,7 @@ use winit::{
 
 mod state;
 mod texture;
+mod camera;
 
 use state::State;
 
