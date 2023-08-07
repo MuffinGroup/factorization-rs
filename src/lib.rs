@@ -7,11 +7,11 @@ use winit::{
 };
 
 mod state;
+mod texture;
 
-use state::State;    
+use state::State;
 
 pub async fn run() {
-
     let event_loop = EventLoop::new();
 
     let window = WindowBuilder::new().build(&event_loop).unwrap();
@@ -37,7 +37,18 @@ pub async fn run() {
                             },
                         ..
                     } => *control_flow = ControlFlow::Exit,
-                    WindowEvent::CursorMoved { position, ..} => {
+                    WindowEvent::KeyboardInput {
+                        input:
+                            KeyboardInput {
+                                state: ElementState::Pressed,
+                                virtual_keycode: Some(VirtualKeyCode::Space),
+                                ..
+                            },
+                        ..
+                    } => {
+                        state.pressed_space = !state.pressed_space
+                    },
+                    WindowEvent::CursorMoved { position, .. } => {
                         println!("{:?}", position);
                         red = (position.x) / 1000.0;
                         println!("{}", (position.x) / 1000.0)
@@ -62,7 +73,12 @@ pub async fn run() {
         }
         Event::RedrawRequested(window_id) if window_id == state.window().id() => {
             state.update();
-            match state.render(wgpu::Color { r: red, g: 0.0, b: 0.0, a: 1.0 }) {
+            match state.render(wgpu::Color {
+                r: red,
+                g: 0.0,
+                b: 0.0,
+                a: 1.0,
+            }) {
                 Ok(_) => {}
                 // Reconfigure the surface if lost
                 Err(wgpu::SurfaceError::Lost) => state.resize(state.size),
