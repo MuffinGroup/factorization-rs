@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=2.0">
+    <title>Learn WGPU</title>
+    <style>
+        canvas {
+            position: relative;
+            background-color: black;
+            width: 2000;
+            height: 200;
+            top: 10000;
+        }
+    </style>
+</head>
+
+<body id="wasm-example">
+  <script type="module">
+      import init from "./pkg/factorization.js";
+      init().then(() => {
+          console.log("WASM Loaded");
+      });
+  </script>
+</body>
+
+</html>

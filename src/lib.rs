@@ -1,11 +1,8 @@
-use std::iter;
-
 use state::Vertex;
-use wgpu::util::DeviceExt;
 use winit::{
     event::*,
     event_loop::{ControlFlow, EventLoop},
-    window::{Window, WindowBuilder},
+    window::WindowBuilder,
 };
 
 #[cfg(target_arch = "wasm32")]
